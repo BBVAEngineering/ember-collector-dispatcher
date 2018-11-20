@@ -6,7 +6,7 @@ export interface DispatcherInterface extends Service {
 	collector: CollectorInterface;
 	isRunning: boolean;
 	isDispatching: boolean;
-	setOptions: void;
+	setOptions(options: any): void;
 	start(): RSVP.Promise<undefined>;
 	stop(): RSVP.Promise<undefined>;
 }
