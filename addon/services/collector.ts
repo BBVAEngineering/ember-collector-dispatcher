@@ -6,8 +6,8 @@ export interface CollectorInterface extends Service {
 	count(): Promise<number>;
 	push(...items: any[]): Promise<boolean>;
 	unshift(...items: any[]): Promise<boolean>;
-	pop(count: number): Promise<any[]>;
-	shift(count: number): Promise<any[]>;
+	pop(count?: number): Promise<any[]>;
+	shift(count?: number): Promise<any[]>;
 }
 
 export default class Collector extends Service {
