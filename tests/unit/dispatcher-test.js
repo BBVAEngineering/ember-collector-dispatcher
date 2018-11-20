@@ -90,7 +90,7 @@ test('it dispatches on timeout', async function(assert) {
 		maxTimeout: 30000
 	};
 
-	await this.service.start(config);
+	await this.service.start();
 
 	assert.notOk(this.service.get('isDispatching'), 'service is not dispatching');
 
