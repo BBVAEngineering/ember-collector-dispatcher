@@ -4,8 +4,8 @@ import { StorageAdapterInterface } from '../storage-adapters/storage-adapter';
 export interface CollectorInterface extends Service {
 	storageAdapter: StorageAdapterInterface;
 	count(): Promise<number>;
-	push(...items: any[]): Promise<boolean>;
-	unshift(...items: any[]): Promise<boolean>;
+	push(...items: any[]): Promise<void>;
+	unshift(...items: any[]): Promise<void>;
 	pop(count?: number): Promise<any[]>;
 	shift(count?: number): Promise<any[]>;
 }
