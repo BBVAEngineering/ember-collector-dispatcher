@@ -84,38 +84,38 @@ test('it stops dispatcher', async function(assert) {
 	assert.notOk(service.get('_isRunning'), 'service is not running');
 });
 
-// test('it dispatches on timeout', async function(assert) {
-// 	const config = {
-// 		dispatcherPath: 'examples/timeout.js',
-// 		maxTimeout: 30000
-// 	};
+test('it dispatches on timeout', async function(assert) {
+	const config = {
+		dispatcherPath: 'examples/timeout.js',
+		maxTimeout: 30000
+	};
 
-// 	await this.service.start(config);
+	await this.service.start(config);
 
-// 	assert.notOk(this.service.get('isDispatching'), 'service is not dispatching');
+	assert.notOk(this.service.get('isDispatching'), 'service is not dispatching');
 
-// 	this.sandbox.clock.tick(15000);
+	this.sandbox.clock.tick(15000);
 
-// 	assert.notOk(this.service.get('isDispatching'), 'service is not dispatching');
+	assert.notOk(this.service.get('isDispatching'), 'service is not dispatching');
 
-// 	this.sandbox.clock.tick(15000);
+	this.sandbox.clock.tick(15000);
 
-// 	assert.ok(this.service.get('isDispatching'), 'service is dispatching');
-// });
+	assert.ok(this.service.get('isDispatching'), 'service is dispatching');
+});
 
-// test('it does not dispatches when is stopped', async function(assert) {
-// 	const config = {
-// 		dispatcherPath: 'examples/timeout.js',
-// 		maxTimeout: 30000
-// 	};
+test('it does not dispatches when is stopped', async function(assert) {
+	const config = {
+		dispatcherPath: 'examples/timeout.js',
+		maxTimeout: 30000
+	};
 
-// 	await this.service.start(config);
-// 	await this.service.stop(config);
+	await this.service.start(config);
+	await this.service.stop(config);
 
-// 	this.sandbox.clock.tick(30000);
+	this.sandbox.clock.tick(30000);
 
-// 	assert.notOk(this.service.get('isDispatching'), 'service is not dispatching');
-// });
+	assert.notOk(this.service.get('isDispatching'), 'service is not dispatching');
+});
 
 test('it asserts when dispatcher path is empty', function(assert) {
 	assert.throws(() => {
@@ -127,74 +127,74 @@ test('it asserts when dispatcher path is empty', function(assert) {
 	});
 });
 
-// test('it calls dispatcher with collector items and stores received items on collector', async function(assert) {
-// 	const config = {
-// 		dispatcherPath: 'examples/reverse.js',
-// 		maxTimeout: 30000
-// 	};
+test('it calls dispatcher with collector items and stores received items on collector', async function(assert) {
+	const config = {
+		dispatcherPath: 'examples/reverse.js',
+		maxTimeout: 30000
+	};
 
-// 	this.collector.content = [1, 2, 3];
+	this.collector.content = [1, 2, 3];
 
-// 	await this.service.start(config);
+	await this.service.start(config);
 
-// 	this.sandbox.clock.tick(30000);
+	this.sandbox.clock.tick(30000);
 
-// 	await waitUntil(() => !this.service.get('isDispatching'));
+	await waitUntil(() => !this.service.get('isDispatching'));
 
-// 	assert.equal(this.collector.content, [3, 2, 1], 'dispatcher has returned items to collector');
-// });
+	assert.equal(this.collector.content, [3, 2, 1], 'dispatcher has returned items to collector');
+});
 
-// test('it calls dispatcher with max items', async function(assert) {
-// 	const config = {
-// 		dispatcherPath: 'examples/reverse.js',
-// 		maxTimeout: 30000,
-// 		maxConcurrent: 5
-// 	};
+test('it calls dispatcher with max items', async function(assert) {
+	const config = {
+		dispatcherPath: 'examples/reverse.js',
+		maxTimeout: 30000,
+		maxConcurrent: 5
+	};
 
-// 	this.collector.content = [1, 2, 3, 4, 5, 6];
+	this.collector.content = [1, 2, 3, 4, 5, 6];
 
-// 	await this.service.start(config);
+	await this.service.start(config);
 
-// 	this.sandbox.clock.tick(30000);
+	this.sandbox.clock.tick(30000);
 
-// 	await waitUntil(() => !this.service.get('isDispatching'));
+	await waitUntil(() => !this.service.get('isDispatching'));
 
-// 	assert.equal(this.collector.content, [5, 4, 3, 2, 1, 6], 'dispatcher has returned items to collector');
-// });
+	assert.equal(this.collector.content, [5, 4, 3, 2, 1, 6], 'dispatcher has returned items to collector');
+});
 
-// test('it does not insert items on collector', async function(assert) {
-// 	const config = {
-// 		dispatcherPath: 'examples/empty.js',
-// 		maxTimeout: 30000
-// 	};
+test('it does not insert items on collector', async function(assert) {
+	const config = {
+		dispatcherPath: 'examples/empty.js',
+		maxTimeout: 30000
+	};
 
-// 	this.collector.content = [1, 2, 3];
+	this.collector.content = [1, 2, 3];
 
-// 	await this.service.start(config);
+	await this.service.start(config);
 
-// 	this.sandbox.clock.tick(30000);
+	this.sandbox.clock.tick(30000);
 
-// 	await waitUntil(() => !this.service.get('isDispatching'));
+	await waitUntil(() => !this.service.get('isDispatching'));
 
-// 	assert.equal(this.collector.content, [], 'dispatcher has returned items to collector');
-// });
+	assert.equal(this.collector.content, [], 'dispatcher has returned items to collector');
+});
 
-// test('it sends config to dispatcher', async function(assert) {
-// 	const config = {
-// 		dispatcherPath: 'examples/params.js',
-// 		maxTimeout: 30000
-// 	};
-// 	const params = {
-// 		foo: 'bar'
-// 	};
+test('it sends config to dispatcher', async function(assert) {
+	const config = {
+		dispatcherPath: 'examples/params.js',
+		maxTimeout: 30000
+	};
+	const params = {
+		foo: 'bar'
+	};
 
-// 	await this.service.start(config);
+	await this.service.start(config);
 
-// 	this.service.setParams(params);
+	this.service.setParams(params);
 
-// 	this.sandbox.clock.tick(30000);
+	this.sandbox.clock.tick(30000);
 
-// 	await waitUntil(() => !this.service.get('isDispatching'));
+	await waitUntil(() => !this.service.get('isDispatching'));
 
-// 	assert.deepEqual(this.collector.content, [[], params], 'dispatcher has returned items to collector');
-// });
+	assert.deepEqual(this.collector.content, [[], params], 'dispatcher has returned items to collector');
+});
