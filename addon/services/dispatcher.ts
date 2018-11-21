@@ -4,6 +4,9 @@ import { CollectorInterface } from './collector';
 
 export interface DispatcherInterface extends Service {
 	collector: CollectorInterface;
+	dispatcherPath: string;
+	maxTimeout: number;
+	maxConcurrent: number;
 	isRunning: boolean;
 	isDispatching: boolean;
 	setOptions(options: any): void;
@@ -12,7 +15,8 @@ export interface DispatcherInterface extends Service {
 }
 
 export default class Dispatcher extends Service {
-
+	async start() {}
+	async stop() {}
 }
 
 declare module '@ember/service' {

@@ -1,39 +1,59 @@
-import { module, test } from 'qunit';
+import { module, test, skip } from 'qunit';
 import { setupTest } from 'ember-qunit';
-import sinon from 'sinon';
+import sinon, { SinonStub, SinonSpy } from 'sinon';
 import { StorageAdapterInterface } from 'ember-iniesta/storage-adapters/storage-adapter';
 import { CollectorInterface } from 'ember-iniesta/services/collector';
 import { DispatcherInterface } from 'ember-iniesta/services/dispatcher';
 import Service from '@ember/service';
 import { TestContext } from 'ember-test-helpers';
-import waitUntil from '@ember/test-helpers/wait-until';
+import { MAX_TIMEOUT, MAX_CONCURRENT } from 'ember-iniesta/constants';
+// import waitUntil from '@ember/test-helpers/wait-until';
+
+interface ChannelInterface {
+	postMessage(data: any): Promise<any>;
+	terminate(): Promise<any>;
+}
+
+interface WorkerInterface {
+	open(name: string): Promise<ChannelInterface>;
+}
 
 module('Unit | Service | dispatcher', (hooks) => {
+	const dispatcherPath = 'examples/dummy.js';
 	let sandbox: sinon.SinonSandbox;
 	let collector: CollectorInterface;
-	let subject: (new (...args: any[]) => DispatcherInterface);
+	let worker: WorkerInterface;
+	let service: DispatcherInterface;
 
-	class DummyCollectorService extends Service implements CollectorInterface {
+	class DummyCollector extends Service implements CollectorInterface {
 		public storageAdapter!: StorageAdapterInterface
-		private content: any[] = [];
 		async count() {
-			return this.content.length;
+			return 0;
 		}
 		async push() {
-			this.content.push(...arguments);
-
 			return true;
 		}
-		async pop(count: number = 1) {
-			return this.content.splice(-count);
+		async pop() {
+			return [];
 		}
 		async unshift() {
-			this.content.unshift(...arguments);
-
 			return true;
 		}
-		async shift(count: number = 1) {
-			return this.content.splice(count);
+		async shift() {
+			return [];
+		}
+	}
+
+	class DummyChannel implements ChannelInterface {
+		async postMessage(data: any) {
+			return data;
+		}
+		async terminate() {}
+	}
+
+	class DummyWorker extends Service implements WorkerInterface {
+		async open() {
+			return new DummyChannel();
 		}
 	}
 
@@ -41,152 +61,173 @@ module('Unit | Service | dispatcher', (hooks) => {
 
 	hooks.beforeEach(async function(this: TestContext) {
 		sandbox = sinon.createSandbox({ useFakeTimers: true });
-		collector = new DummyCollectorService();
-		subject = this.owner.factoryFor('service:dispatcher');
+		collector = new DummyCollector();
+		worker = new DummyWorker();
+
+		const subject = this.owner.factoryFor('service:dispatcher');
+
+		service = subject.create({ collector, worker, dispatcherPath });
 	});
 
 	test('it exists', (assert) => {
-		const service = new subject({ dispatcherPath: 'examples/dummy.js' });
-
 		assert.ok(service);
 	});
 
-	test('it is not running by default', (assert) => {
-		const service = new subject({ dispatcherPath: 'examples/dummy.js' });
-
-		assert.notOk(service.get('isRunning'), 'service is not running');
+	skip('it has default values', (assert) => {
+		assert.notOk(service.isRunning, 'service is not running');
+		assert.notOk(service.isDispatching, 'service is not dispatching');
+		assert.equal(service.maxTimeout, MAX_TIMEOUT, 'value is expected');
+		assert.equal(service.maxConcurrent, MAX_CONCURRENT, 'value is expected');
 	});
 
-	test('it starts dispatcher', async(assert) => {
-		const service = new subject({ dispatcherPath: 'examples/dummy.js' });
+	skip('it throws an error when dispatcher path is empty', (assert) => {
+		service.dispatcherPath = '';
 
-		await service.start();
-
-		assert.ok(service.get('isRunning'), 'service is running');
-	});
-
-	test('it stops dispatcher', async(assert) => {
-		const service = new subject({ dispatcherPath: 'examples/dummy.js' });
-
-		await service.start();
-
-		await service.stop();
-
-		assert.notOk(service.get('isRunning'), 'service is not running');
-	});
-
-	test('it dispatches on timeout', async(assert) => {
-		const service = new subject({
-			dispatcherPath: 'examples/timeout.js',
-			maxTimeout: 30000
-		});
-
-		await service.start();
-
-		assert.notOk(service.get('isDispatching'), 'service is not dispatching');
-
-		sandbox.clock.tick(15000);
-
-		assert.notOk(service.get('isDispatching'), 'service is not dispatching');
-
-		sandbox.clock.tick(15000);
-
-		assert.ok(service.get('isDispatching'), 'service is dispatching');
-	});
-
-	test('it does not dispatches when is stopped', async(assert) => {
-		const service = new subject({
-			dispatcherPath: 'examples/timeout.js',
-			maxTimeout: 30000
-		});
-
-		await service.start();
-		await service.stop();
-
-		sandbox.clock.tick(30000);
-
-		assert.notOk(service.get('isDispatching'), 'service is not dispatching');
-	});
-
-	test('it asserts when dispatcher path is empty', (assert) => {
 		assert.throws(() => {
-			// eslint-disable-next-line no-new
-			new subject();
+			service.start();
 		});
 	});
 
-	test('it calls dispatcher with collector items and stores received items on collector', async(assert) => {
-		const service = new subject({
-			dispatcherPath: 'examples/reverse.js',
-			maxTimeout: 30000
-		});
+	skip('it starts dispatcher', async(assert) => {
+		const channel = new DummyChannel();
+		const options = { dispatcherPath };
 
-		await collector.push(1, 2, 3);
+		channel.postMessage = sandbox.spy();
+		worker.open = sandbox.stub().resolves(channel);
+
+		await service.start();
+
+		assert.ok(service.isRunning, 'service is running');
+		assert.ok((worker.open as SinonStub).calledWith('dispatcher'), 'worker is open');
+		assert.ok((channel.postMessage as SinonSpy).calledWith('install', { options }), 'worker is open');
+	});
+
+	skip('it stops dispatcher', async(assert) => {
+		const channel = new DummyChannel();
+
+		channel.terminate = sandbox.spy();
+		worker.open = sandbox.stub().resolves(channel);
+
+		await service.start();
+		await service.stop();
+
+		assert.notOk(service.isRunning, 'service is running');
+		assert.ok((channel.terminate as SinonSpy).calledOnce);
+	});
+
+	skip('it dispatches on timeout when has items', async(assert) => {
+		const channel = new DummyChannel();
+		const items = [1, 2, 3];
+
+		service.maxTimeout = 30000;
+		service.maxConcurrent = 50;
+
+		collector.shift = sandbox.stub().returns(items);
+		channel.postMessage = sandbox.spy();
+		worker.open = sandbox.stub().resolves(channel);
+
+		await service.start();
+
+		assert.notOk(service.isDispatching, 'service is not dispatching');
+		assert.notOk((collector.shift as SinonStub).calledWith(50));
+		assert.notOk((channel.postMessage as SinonSpy).calledWith('dispatch', { items }));
+
+		sandbox.clock.tick(15000);
+
+		assert.notOk(service.isDispatching, 'service is not dispatching');
+		assert.notOk((collector.shift as SinonStub).calledWith(50));
+		assert.notOk((channel.postMessage as SinonSpy).calledWith('dispatch', { items }));
+
+		sandbox.clock.tick(15000);
+
+		assert.ok(service.isDispatching, 'service is dispatching');
+		assert.ok((collector.shift as SinonStub).calledWith(50));
+		assert.ok((channel.postMessage as SinonSpy).calledWith('dispatch', { items }));
+	});
+
+	skip('it does not dispatch on timeout when has no items', async(assert) => {
+		const channel = new DummyChannel();
+
+		service.maxTimeout = 30000;
+
+		channel.postMessage = sandbox.spy();
+		worker.open = sandbox.stub().resolves(channel);
 
 		await service.start();
 
 		sandbox.clock.tick(30000);
 
-		await waitUntil(() => !service.get('isDispatching'));
-
-		assert.equal(await collector.shift(3), [3, 2, 1], 'dispatcher has returned items to collector');
+		assert.notOk(service.isDispatching, 'service is not dispatching');
+		assert.ok((channel.postMessage as SinonSpy).notCalled);
 	});
 
-	test('it calls dispatcher with max items', async(assert) => {
-		const service = new subject({
-			dispatcherPath: 'examples/reverse.js',
-			maxTimeout: 30000,
-			maxConcurrent: 5
-		});
+	skip('it does not dispatches when is stopped', async(assert) => {
+		const channel = new DummyChannel();
+		const items = [1, 2, 3];
 
-		await collector.push(1, 2, 3, 4, 5, 6);
+		service.maxTimeout = 30000;
+		service.maxConcurrent = 50;
+		collector.shift = sandbox.stub().returns(items);
+
+		channel.postMessage = sandbox.spy();
+		worker.open = sandbox.stub().resolves(channel);
 
 		await service.start();
+		await service.stop();
 
 		sandbox.clock.tick(30000);
 
-		await waitUntil(() => !service.get('isDispatching'));
-
-		assert.equal(await collector.shift(6), [5, 4, 3, 2, 1, 6], 'dispatcher has returned items to collector');
+		assert.notOk(service.isDispatching, 'service is not dispatching');
+		assert.ok((collector.shift as SinonStub).notCalled);
+		assert.ok((channel.postMessage as SinonSpy).notCalled);
 	});
 
-	test('it does not insert items on collector', async(assert) => {
-		const service = new subject({
-			dispatcherPath: 'examples/empty.js',
-			maxTimeout: 30000
-		});
+	skip('it gives options to dispatcher', async(assert) => {
+		const channel = new DummyChannel();
+		const items = [1, 2, 3];
+		const options = { foo: 'bar' };
 
-		await collector.push(1, 2, 3);
+		service.maxTimeout = 30000;
+		service.maxConcurrent = 50;
+		collector.shift = sandbox.stub().returns(items);
 
-		await service.start();
-
-		sandbox.clock.tick(30000);
-
-		await waitUntil(() => !service.get('isDispatching'));
-
-		assert.equal(await collector.count(), 0, 'dispatcher has returned items to collector');
-	});
-
-	test('it sends config to dispatcher', async(assert) => {
-		const service = new subject({
-			dispatcherPath: 'examples/params.js',
-			maxTimeout: 30000
-		});
-		const options = {
-			foo: 'bar'
-		};
-
-		await service.start();
+		channel.postMessage = sandbox.spy();
+		worker.open = sandbox.stub().resolves(channel);
 
 		service.setOptions(options);
 
-		await collector.push(1);
+		await service.start();
 
 		sandbox.clock.tick(30000);
 
-		await waitUntil(() => !service.get('isDispatching'));
+		assert.notOk((collector.shift as SinonStub).calledWith(50));
+		assert.ok((channel.postMessage as SinonSpy).calledWith('dispatch', { items, options }));
+	});
 
-		assert.deepEqual(await collector.shift(), [[1], options], 'dispatcher has returned items to collector');
+	skip('it dispatches multiple time when has enough items', async(assert) => {
+		const channel = new DummyChannel();
+
+		service.maxTimeout = 30000;
+		service.maxConcurrent = 2;
+		collector.shift = sandbox.stub();
+
+		(collector.shift as SinonStub).onCall(0).returns([1, 2]);
+		(collector.shift as SinonStub).onCall(1).returns([3]);
+
+		channel.postMessage = sandbox.spy();
+		worker.open = sandbox.stub().resolves(channel);
+
+		await service.start();
+
+		sandbox.clock.tick(30000);
+
+		assert.ok((collector.shift as SinonStub).calledWith(2));
+		assert.ok((channel.postMessage as SinonSpy).calledWith('dispatch', { items: [1, 2] }));
+
+		sandbox.clock.tick(30000);
+
+		assert.ok((collector.shift as SinonStub).calledWith(2));
+		assert.ok((channel.postMessage as SinonSpy).calledWith('dispatch', { items: [3] }));
 	});
 });
 

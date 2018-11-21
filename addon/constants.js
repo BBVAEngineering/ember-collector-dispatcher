@@ -1,4 +1,2 @@
-export const LIMITS = {
-	MAX_TIMEOUTS:  30000,
-	MAX_CONCURRENTS: 20
-};
+export const MAX_TIMEOUT = 30000;
+export const MAX_CONCURRENT = 50;
