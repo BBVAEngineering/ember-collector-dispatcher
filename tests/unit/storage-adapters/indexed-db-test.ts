@@ -1,4 +1,4 @@
-import { module, test, skip } from 'qunit';
+import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
 import { TestContext } from 'ember-test-helpers';
 import { IndexedDbInterface, schema, version, tableName } from 'ember-iniesta/storage-adapters/indexed-db';

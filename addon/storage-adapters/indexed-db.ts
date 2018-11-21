@@ -76,7 +76,7 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 
 	async pop(this: IndexedDb, count?: number) {
 		const times = count || 1;
-		let result = []
+		let result = [];
 		for (let i = 0; i<times; i++){
 			const item = await this._removeItem(true);
 			result = [...result, ...item];
@@ -86,7 +86,7 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 
 	async shift(this: IndexedDb, count?: number) {
 		const times = count || 1;
-		let result = []
+		let result = [];
 		for (let i = 0; i<times; i++){
 			const item = await this._removeItem();
 			result = [...result, ...item];
