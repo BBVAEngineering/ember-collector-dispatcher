@@ -12,63 +12,86 @@ export interface CollectorInterface extends Service {
 }
 
 export default class Collector extends Service {
-	private storageAdapter!: StorageAdapterInterface;
+	private storageAdapter: Promise<StorageAdapterInterface>;
 	public adapters!: any[];
 
-	constructor(){
+	constructor() {
 		super(...arguments);
 
 		if (!this.adapters) {
 			throw new Error('You must define `adapters` property on your configuration');
 		}
 
-		// let supportedAdapter;
-		// let options;
-
-		// supportedAdapter = this._getAdapter();
-
-		// if (!supportedAdapter) {
-		// 	throw new Error('You must define any supported adapter: indexed-db, local-storage or memory');
-		// }
-
-		// if (supportedAdapter[0]) {
-		// 	options = supportedAdapter[1];
-		// 	supportedAdapter = supportedAdapter[0];
-		// }
-
-		// this.storageAdapter = getOwner(this).factoryFor(`storage-adapter:${supportedAdapter}`).create(options);
+		this.storageAdapter = this.getAdapter();
 	}
 
-	// async _getAdapter() {
-	// 	return this.adapters.find((adapter: string | any[]) => {
-	// 		return getOwner(this).factoryFor(`storage-adapter:${adapter[0] || adapter}`).isSupported();
-	// 	});
-	// }
+	private async getAdapter(){
+		let supportedAdapter;
+		let options;
 
-	count() {
-		return this.storageAdapter.count();
+		supportedAdapter = await this.findAdapter() || 'memory';
+
+		if (!supportedAdapter) {
+			throw new Error('You must define any supported adapter: indexed-db, local-storage or memory');
+		}
+
+		if (Array.isArray(supportedAdapter)) {
+			options = supportedAdapter[1];
+			supportedAdapter = supportedAdapter[0];
+		}
+
+		return getOwner(this).factoryFor(`storage-adapter:${supportedAdapter}`).create(options);
 	}
 
-	push(...items: any[]) {
-		return this.storageAdapter.push(items);
+	private async findAdapter() {
+		const owner = getOwner(this);
+		let supported;
+		for(let i = 0; i < this.adapters.length; i++) {
+			const adapter = this.adapters[i];
+			const name = Array.isArray(adapter) ? adapter[0] : adapter;
+
+			if (await owner.factoryFor(`storage-adapter:${name}`).isSupported()) {
+				supported = adapter;
+				break;
+			}
+		}
+		return supported;
 	}
 
-	unshift(...items: any[]) {
-		return this.storageAdapter.unshift(items);
+	async count() {
+		const adapter = await this.storageAdapter;
+
+		return adapter.count();
 	}
 
-	pop(count?: number) {
-		return this.storageAdapter.pop(count);
+	async push(...items: any[]) {
+		const adapter = await this.storageAdapter;
+
+		return adapter.push(items);
 	}
 
-	shift(count?: number) {
-		return this.storageAdapter.shift(count);
+	async unshift(...items: any[]) {
+		const adapter = await this.storageAdapter;
+
+		return adapter.unshift(items);
+	}
+
+	async pop(count?: number) {
+		const adapter = await this.storageAdapter;
+
+		return adapter.pop(count);
+	}
+
+	async shift(count?: number) {
+		const adapter = await this.storageAdapter;
+
+		return adapter.shift(count);
 	}
 
 }
 
 declare module '@ember/service' {
-  interface Registry {
-    'collector': CollectorInterface;
-  }
+	interface Registry {
+		'collector': CollectorInterface;
+	}
 }
