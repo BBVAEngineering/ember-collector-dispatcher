@@ -29,13 +29,30 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 		table = await setupIndexedDb(dbName);
 	});
 
-	hooks.afterEach(async function(this: TestContext) {
+	hooks.afterEach(async() => {
 		await table.clear();
-		await Dexie.delete(dbName);
 	});
 
 	test('it exists', (assert) => {
-		assert.ok(storage);
+		assert.ok(storage, 'service exists');
+	});
+
+	test('it is supported', (assert) => {
+		assert.ok(storage.isSupported(), 'storage is supported');
+	});
+
+	test('it checks when is not supported', async function(this: TestContext, assert) {
+		const indexedDB = Dexie.dependencies.indexedDB;
+
+		Dexie.dependencies.indexedDB = (null as unknown) as IDBFactory;
+
+		const factory = this.owner.factoryFor('storage-adapter:indexed-db');
+
+		storage = factory.create({ database: dbName });
+
+		assert.notOk(await storage.isSupported(), 'storage is not supported');
+
+		Dexie.dependencies.indexedDB = indexedDB;
 	});
 
 	test('it returns count of items', async(assert) => {
@@ -79,7 +96,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 	});
 
 	test('it pushes an item and pops once', async(assert) => {
-		await table.bulkAdd([{ _id: 1, foo: 'bar' }]);
+		await storage.push({ foo: 'bar' });
 
 		const item = await storage.pop();
 
@@ -87,7 +104,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 	});
 
 	test('it pushes items and pops once', async(assert) => {
-		await table.bulkAdd([{ _id: 1, foo: 'bar' }, { _id: 2, bar: 'foo' }]);
+		await storage.push({ foo: 'bar' }, { bar: 'foo' });
 
 		const item = await storage.pop();
 
@@ -95,7 +112,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 	});
 
 	test('it pushes items and pops several times', async(assert) => {
-		await table.bulkAdd([{ _id: 1, foo: 'bar' }, { _id: 2, bar: 'foo' }]);
+		await storage.push({ foo: 'bar' }, { bar: 'foo' });
 
 		const item = await storage.pop(2);
 
@@ -103,7 +120,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 	});
 
 	test('it pushes an item and shifts once', async(assert) => {
-		await table.bulkAdd([{ _id: 1, foo: 'bar' }]);
+		await storage.push({ foo: 'bar' });
 
 		const item = await storage.shift();
 
@@ -111,7 +128,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 	});
 
 	test('it pushes items and shifts once', async(assert) => {
-		await table.bulkAdd([{ _id: 1, foo: 'bar' }, { _id: 2, bar: 'foo' }]);
+		await storage.push({ foo: 'bar' }, { bar: 'foo' });
 
 		const item = await storage.shift();
 
@@ -119,7 +136,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 	});
 
 	test('it pushes items and shifts several times', async(assert) => {
-		await table.bulkAdd([{ _id: 1, foo: 'bar' }, { _id: 2, bar: 'foo' }]);
+		await storage.push({ foo: 'bar' }, { bar: 'foo' });
 
 		const item = await storage.shift(2);
 

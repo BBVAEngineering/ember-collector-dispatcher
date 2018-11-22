@@ -12,7 +12,7 @@ export default class Memory extends EmberObject {
 		this.memory = [];
 	}
 
-	isSupported(this: Memory){
+	async isSupported() {
 		return true;
 	}
 

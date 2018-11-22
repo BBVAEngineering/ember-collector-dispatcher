@@ -32,7 +32,7 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 		this.table = table;
 	}
 
-	isSupported(this: IndexedDb){
+	async isSupported() {
 		return true;
 	}
 

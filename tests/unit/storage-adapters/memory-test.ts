@@ -14,12 +14,12 @@ module('Unit | StorageAdapter | memory', (hooks) => {
 		storage = factory.create();
 	});
 
-	hooks.afterEach(function(this: TestContext) {
-		storage.destroy();
+	test('it exists', (assert) => {
+		assert.ok(storage);
 	});
 
-	test('it exists', function(assert) {
-		assert.ok(storage);
+	test('it is supported', (assert) => {
+		assert.ok(storage.isSupported(), 'storage is supported');
 	});
 
 	test('it pushes an item', async(assert) => {
@@ -68,6 +68,14 @@ module('Unit | StorageAdapter | memory', (hooks) => {
 		const item = await storage.pop();
 
 		assert.deepEqual(item, [{ bar: 'foo' }], 'item is expected');
+	});
+
+	test('it pushes items and pops several times', async(assert) => {
+		await storage.push({ foo: 'bar' }, { bar: 'foo' });
+
+		const item = await storage.pop(2);
+
+		assert.deepEqual(item, [{ foo: 'bar' }, { bar: 'foo' }], 'item is expected');
 	});
 
 	test('it pushes an item and shifts once', async(assert) => {
