@@ -8,7 +8,7 @@ import Service from '@ember/service';
 import { TestContext } from 'ember-test-helpers';
 import { MAX_TIMEOUT, MAX_CONCURRENT } from 'ember-iniesta/constants';
 import { service } from '@ember-decorators/service';
-import RSVP from 'rsvp';
+import waitUntil from '@ember/test-helpers/wait-until';
 
 declare module '@ember/service' {
 	interface Registry {
@@ -65,7 +65,6 @@ module('Unit | Service | dispatcher', (hooks) => {
 		assert.ok(dispatcher);
 	});
 
-
 	test('it has default values', (assert) => {
 		assert.notOk(dispatcher.isRunning, 'dispatcher is not running');
 		assert.notOk(dispatcher.isDispatching, 'dispatcher is not dispatching');
@@ -88,46 +87,43 @@ module('Unit | Service | dispatcher', (hooks) => {
 
 	test('it dispatches on timeout when has items', async(assert) => {
 		const items = [1, 2, 3];
-		const deferred = RSVP.defer();
 
 		dispatcher.maxTimeout = 30000;
 		dispatcher.maxConcurrent = 50;
 
-		collector.shift = sandbox.stub().returns(items);
-		dispatcher.dispatch = sandbox.stub().returns(deferred.promise);
+		collector.shift = sandbox.stub().resolves(items);
+		dispatcher.dispatch = sandbox.stub().resolves([]);
 
 		await dispatcher.start();
 
 		assert.notOk(dispatcher.isDispatching, 'dispatcher is not dispatching');
-		assert.notOk((collector.shift as SinonStub).calledWith(50));
-		assert.notOk((dispatcher.dispatch as SinonSpy).calledWith(items));
 
 		sandbox.clock.tick(15000);
 
 		assert.notOk(dispatcher.isDispatching, 'dispatcher is not dispatching');
-		assert.notOk((collector.shift as SinonStub).calledWith(50));
-		assert.notOk((dispatcher.dispatch as SinonSpy).calledWith(items));
 
 		sandbox.clock.tick(15000);
 
 		assert.ok(dispatcher.isDispatching, 'dispatcher is dispatching');
-		assert.ok((collector.shift as SinonStub).calledWith(50));
-		assert.ok((dispatcher.dispatch as SinonStub).calledWith(items));
 
-		deferred.resolve();
+		await waitUntil(() => !dispatcher.isDispatching);
 
 		assert.notOk(dispatcher.isDispatching, 'dispatcher is not dispatching');
+		assert.ok((collector.shift as SinonStub).calledWith(50));
+		assert.ok((dispatcher.dispatch as SinonStub).calledWith(items));
 	});
 
 	test('it does not dispatch on timeout when has no items', async(assert) => {
 		dispatcher.maxTimeout = 30000;
 
-		collector.shift = sandbox.stub().returns([]);
+		collector.shift = sandbox.stub().resolves([]);
 		dispatcher.dispatch = sandbox.spy();
 
 		await dispatcher.start();
 
 		sandbox.clock.tick(30000);
+
+		await waitUntil(() => !dispatcher.isDispatching);
 
 		assert.notOk(dispatcher.isDispatching, 'dispatcher is not dispatching');
 		assert.ok((collector.shift as SinonStub).calledWith(50));
@@ -140,13 +136,15 @@ module('Unit | Service | dispatcher', (hooks) => {
 		dispatcher.maxTimeout = 30000;
 		dispatcher.maxConcurrent = 50;
 
-		collector.shift = sandbox.stub().returns(items);
+		collector.shift = sandbox.stub().resolves(items);
 		dispatcher.dispatch = sandbox.spy();
 
 		await dispatcher.start();
 		await dispatcher.stop();
 
 		sandbox.clock.tick(30000);
+
+		await waitUntil(() => !dispatcher.isDispatching);
 
 		assert.notOk(dispatcher.isDispatching, 'dispatcher is not dispatching');
 		assert.ok((collector.shift as SinonStub).notCalled);
@@ -155,20 +153,19 @@ module('Unit | Service | dispatcher', (hooks) => {
 
 	test('it inserts not dispatched items into collector', async(assert) => {
 		const items = [1, 2, 3];
-		const deferred = RSVP.defer();
 
 		dispatcher.maxTimeout = 30000;
 		dispatcher.maxConcurrent = 50;
 
-		collector.shift = sandbox.stub().returns(items);
+		collector.shift = sandbox.stub().resolves(items);
 		collector.unshift = sandbox.spy();
-		dispatcher.dispatch = sandbox.stub().returns(deferred.promise);
+		dispatcher.dispatch = sandbox.stub().resolves([1, 2]);
 
 		await dispatcher.start();
 
 		sandbox.clock.tick(30000);
 
-		deferred.resolve([1, 2]);
+		await waitUntil(() => !dispatcher.isDispatching);
 
 		assert.ok((collector.unshift as SinonSpy).calledWith([1, 2]));
 	});
@@ -180,17 +177,21 @@ module('Unit | Service | dispatcher', (hooks) => {
 		collector.shift = sandbox.stub();
 		dispatcher.dispatch = sandbox.stub().resolves([]);
 
-		(collector.shift as SinonStub).onCall(0).returns([1, 2]);
-		(collector.shift as SinonStub).onCall(1).returns([3]);
+		(collector.shift as SinonStub).onCall(0).resolves([1, 2]);
+		(collector.shift as SinonStub).onCall(1).resolves([3]);
 
 		await dispatcher.start();
 
 		sandbox.clock.tick(30000);
 
+		await waitUntil(() => !dispatcher.isDispatching);
+
 		assert.ok((collector.shift as SinonStub).calledWith(2));
 		assert.ok((dispatcher.dispatch as SinonSpy).calledWith([1, 2]));
 
 		sandbox.clock.tick(30000);
+
+		await waitUntil(() => !dispatcher.isDispatching);
 
 		assert.ok((collector.shift as SinonStub).calledWith(2));
 		assert.ok((dispatcher.dispatch as SinonSpy).calledWith([3]));
