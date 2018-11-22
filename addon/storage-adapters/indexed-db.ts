@@ -1,6 +1,7 @@
 import { StorageAdapterInterface } from './storage-adapter';
 import EmberObject from '@ember/object';
 import { isPresent } from '@ember/utils';
+import Dexie from 'dexie';
 
 export const version = 1;
 export const tableName = 'logs';
@@ -17,7 +18,7 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 	private db: Dexie;
 	private table:  Dexie.Table<any, number>;
 
-	constructor(this: IndexedDb) {
+	constructor() {
 		super(...arguments);
 
 		const db = new Dexie(this.database);
