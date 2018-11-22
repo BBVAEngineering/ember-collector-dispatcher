@@ -3,27 +3,23 @@ import { setupTest } from 'ember-qunit';
 import sinon, { SinonStub, SinonSpy } from 'sinon';
 import { StorageAdapterInterface } from 'ember-iniesta/storage-adapters/storage-adapter';
 import { CollectorInterface } from 'ember-iniesta/services/collector';
-import { DispatcherInterface } from 'ember-iniesta/services/dispatcher';
+import Dispatcher, { DispatcherInterface } from 'ember-iniesta/services/dispatcher';
 import Service from '@ember/service';
 import { TestContext } from 'ember-test-helpers';
 import { MAX_TIMEOUT, MAX_CONCURRENT } from 'ember-iniesta/constants';
-// import waitUntil from '@ember/test-helpers/wait-until';
+import { service } from '@ember-decorators/service';
+import RSVP from 'rsvp';
 
-interface ChannelInterface {
-	postMessage(data: any): Promise<any>;
-	terminate(): Promise<any>;
-}
-
-interface WorkerInterface {
-	open(name: string): Promise<ChannelInterface>;
+declare module '@ember/service' {
+	interface Registry {
+		'dummy-collector': CollectorInterface;
+	}
 }
 
 module('Unit | Service | dispatcher', (hooks) => {
-	const dispatcherPath = 'examples/dummy.js';
 	let sandbox: sinon.SinonSandbox;
 	let collector: CollectorInterface;
-	let worker: WorkerInterface;
-	let service: DispatcherInterface;
+	let dispatcher: DispatcherInterface;
 
 	class DummyCollector extends Service implements CollectorInterface {
 		public storageAdapter!: StorageAdapterInterface
@@ -44,16 +40,12 @@ module('Unit | Service | dispatcher', (hooks) => {
 		}
 	}
 
-	class DummyChannel implements ChannelInterface {
-		async postMessage(data: any) {
-			return data;
-		}
-		async terminate() {}
-	}
+	class DummyDispatcher extends Dispatcher {
+		@service('dummy-collector')
+		public collector!: CollectorInterface;
 
-	class DummyWorker extends Service implements WorkerInterface {
-		async open() {
-			return new DummyChannel();
+		async dispatch(items: any[]) {
+			return items;
 		}
 	}
 
@@ -61,177 +53,147 @@ module('Unit | Service | dispatcher', (hooks) => {
 
 	hooks.beforeEach(async function(this: TestContext) {
 		sandbox = sinon.createSandbox({ useFakeTimers: true });
-		collector = new DummyCollector();
-		worker = new DummyWorker();
 
-		const subject = this.owner.factoryFor('service:dispatcher');
+		this.owner.register('service:dummy-collector', DummyCollector);
+		this.owner.register('service:dummy-dispatcher', DummyDispatcher);
 
-		service = subject.create({ collector, worker, dispatcherPath });
+		collector = this.owner.lookup('service:dummy-collector');
+		dispatcher = this.owner.lookup('service:dummy-dispatcher');
 	});
 
 	test('it exists', (assert) => {
-		assert.ok(service);
+		assert.ok(dispatcher);
 	});
+
 
 	test('it has default values', (assert) => {
-		assert.notOk(service.isRunning, 'service is not running');
-		assert.notOk(service.isDispatching, 'service is not dispatching');
-		assert.equal(service.maxTimeout, MAX_TIMEOUT, 'value is expected');
-		assert.equal(service.maxConcurrent, MAX_CONCURRENT, 'value is expected');
-	});
-
-	test('it throws an error when dispatcher path is empty', async (assert) => {
-		service.dispatcherPath = '';
-
-		try {
-			await service.start();
-
-			assert.ok(false, 'not expected branch');
-		} catch (e) {
-			assert.ok(e instanceof Error, 'error is expected');
-		}
+		assert.notOk(dispatcher.isRunning, 'dispatcher is not running');
+		assert.notOk(dispatcher.isDispatching, 'dispatcher is not dispatching');
+		assert.equal(dispatcher.maxTimeout, MAX_TIMEOUT, 'value is expected');
+		assert.equal(dispatcher.maxConcurrent, MAX_CONCURRENT, 'value is expected');
 	});
 
 	test('it starts dispatcher', async(assert) => {
-		const channel = new DummyChannel();
-		const options = { dispatcherPath };
+		await dispatcher.start();
 
-		channel.postMessage = sandbox.spy();
-		worker.open = sandbox.stub().resolves(channel);
-
-		await service.start();
-
-		assert.ok(service.isRunning, 'service is running');
-		assert.ok((worker.open as SinonStub).calledWith('dispatcher'), 'worker is open');
-		assert.ok((channel.postMessage as SinonSpy).calledWith('install', { options }), 'channel is called');
+		assert.ok(dispatcher.isRunning, 'dispatcher is running');
 	});
 
 	test('it stops dispatcher', async(assert) => {
-		const channel = new DummyChannel();
+		await dispatcher.start();
+		await dispatcher.stop();
 
-		channel.terminate = sandbox.spy();
-		worker.open = sandbox.stub().resolves(channel);
-
-		await service.start();
-		await service.stop();
-
-		assert.notOk(service.isRunning, 'service is running');
-		assert.ok((channel.terminate as SinonSpy).calledOnce);
+		assert.notOk(dispatcher.isRunning, 'dispatcher is running');
 	});
 
 	test('it dispatches on timeout when has items', async(assert) => {
-		const channel = new DummyChannel();
 		const items = [1, 2, 3];
+		const deferred = RSVP.defer();
 
-		service.maxTimeout = 30000;
-		service.maxConcurrent = 50;
+		dispatcher.maxTimeout = 30000;
+		dispatcher.maxConcurrent = 50;
 
 		collector.shift = sandbox.stub().returns(items);
-		channel.postMessage = sandbox.spy();
-		worker.open = sandbox.stub().resolves(channel);
+		dispatcher.dispatch = sandbox.stub().returns(deferred.promise);
 
-		await service.start();
+		await dispatcher.start();
 
-		assert.notOk(service.isDispatching, 'service is not dispatching');
+		assert.notOk(dispatcher.isDispatching, 'dispatcher is not dispatching');
 		assert.notOk((collector.shift as SinonStub).calledWith(50));
-		assert.notOk((channel.postMessage as SinonSpy).calledWith('dispatch', { items }));
+		assert.notOk((dispatcher.dispatch as SinonSpy).calledWith(items));
 
-		await sandbox.clock.tick(15000);
+		sandbox.clock.tick(15000);
 
-		assert.notOk(service.isDispatching, 'service is not dispatching');
+		assert.notOk(dispatcher.isDispatching, 'dispatcher is not dispatching');
 		assert.notOk((collector.shift as SinonStub).calledWith(50));
-		assert.notOk((channel.postMessage as SinonSpy).calledWith('dispatch', { items }));
+		assert.notOk((dispatcher.dispatch as SinonSpy).calledWith(items));
 
-		await sandbox.clock.tick(15000);
+		sandbox.clock.tick(15000);
 
-		assert.ok(service.isDispatching, 'service is dispatching');
+		assert.ok(dispatcher.isDispatching, 'dispatcher is dispatching');
 		assert.ok((collector.shift as SinonStub).calledWith(50));
-		assert.ok((channel.postMessage as SinonSpy).calledWith('dispatch', { items }));
+		assert.ok((dispatcher.dispatch as SinonStub).calledWith(items));
+
+		deferred.resolve();
+
+		assert.notOk(dispatcher.isDispatching, 'dispatcher is not dispatching');
 	});
 
 	test('it does not dispatch on timeout when has no items', async(assert) => {
-		const channel = new DummyChannel();
+		dispatcher.maxTimeout = 30000;
 
-		service.maxTimeout = 30000;
+		collector.shift = sandbox.stub().returns([]);
+		dispatcher.dispatch = sandbox.spy();
 
-		channel.postMessage = sandbox.spy();
-		worker.open = sandbox.stub().resolves(channel);
+		await dispatcher.start();
 
-		await service.start();
+		sandbox.clock.tick(30000);
 
-		await sandbox.clock.tick(30000);
-
-		assert.notOk(service.isDispatching, 'service is not dispatching');
-		assert.notOk((channel.postMessage as SinonStub).calledWith('dispatch'), 'dispatcher is not called');
+		assert.notOk(dispatcher.isDispatching, 'dispatcher is not dispatching');
+		assert.ok((collector.shift as SinonStub).calledWith(50));
+		assert.ok((dispatcher.dispatch as SinonSpy).notCalled);
 	});
 
 	test('it does not dispatches when is stopped', async(assert) => {
-		const channel = new DummyChannel();
 		const items = [1, 2, 3];
 
-		service.maxTimeout = 30000;
-		service.maxConcurrent = 50;
+		dispatcher.maxTimeout = 30000;
+		dispatcher.maxConcurrent = 50;
+
 		collector.shift = sandbox.stub().returns(items);
+		dispatcher.dispatch = sandbox.spy();
 
-		channel.postMessage = sandbox.spy();
-		worker.open = sandbox.stub().resolves(channel);
+		await dispatcher.start();
+		await dispatcher.stop();
 
-		await service.start();
-		await service.stop();
+		sandbox.clock.tick(30000);
 
-		await sandbox.clock.tick(30000);
-
-		assert.notOk(service.isDispatching, 'service is not dispatching');
+		assert.notOk(dispatcher.isDispatching, 'dispatcher is not dispatching');
 		assert.ok((collector.shift as SinonStub).notCalled);
-		assert.notOk((channel.postMessage as SinonStub).calledWith('dispatch'), 'dispatcher is not called');
+		assert.ok((dispatcher.dispatch as SinonSpy).notCalled);
 	});
 
-	test('it gives options to dispatcher', async(assert) => {
-		const channel = new DummyChannel();
+	test('it inserts not dispatched items into collector', async(assert) => {
 		const items = [1, 2, 3];
-		const options = { foo: 'bar' };
+		const deferred = RSVP.defer();
 
-		service.maxTimeout = 30000;
-		service.maxConcurrent = 50;
+		dispatcher.maxTimeout = 30000;
+		dispatcher.maxConcurrent = 50;
+
 		collector.shift = sandbox.stub().returns(items);
+		collector.unshift = sandbox.spy();
+		dispatcher.dispatch = sandbox.stub().returns(deferred.promise);
 
-		channel.postMessage = sandbox.spy();
-		worker.open = sandbox.stub().resolves(channel);
+		await dispatcher.start();
 
-		service.setOptions(options);
+		sandbox.clock.tick(30000);
 
-		await service.start();
+		deferred.resolve([1, 2]);
 
-		await sandbox.clock.tick(30000);
-
-		assert.ok((collector.shift as SinonStub).calledWith(50));
-		assert.ok((channel.postMessage as SinonSpy).calledWith('dispatch', { items, options }));
+		assert.ok((collector.unshift as SinonSpy).calledWith([1, 2]));
 	});
 
 	test('it dispatches multiple time when has enough items', async(assert) => {
-		const channel = new DummyChannel();
+		dispatcher.maxTimeout = 30000;
+		dispatcher.maxConcurrent = 2;
 
-		service.maxTimeout = 30000;
-		service.maxConcurrent = 2;
 		collector.shift = sandbox.stub();
+		dispatcher.dispatch = sandbox.stub().resolves([]);
 
 		(collector.shift as SinonStub).onCall(0).returns([1, 2]);
 		(collector.shift as SinonStub).onCall(1).returns([3]);
 
-		channel.postMessage = sandbox.spy();
-		worker.open = sandbox.stub().resolves(channel);
+		await dispatcher.start();
 
-		await service.start();
-
-		await sandbox.clock.tick(30000);
+		sandbox.clock.tick(30000);
 
 		assert.ok((collector.shift as SinonStub).calledWith(2));
-		assert.ok((channel.postMessage as SinonSpy).calledWith('dispatch', { items: [1, 2] }));
+		assert.ok((dispatcher.dispatch as SinonSpy).calledWith([1, 2]));
 
-		await sandbox.clock.tick(30000);
+		sandbox.clock.tick(30000);
 
 		assert.ok((collector.shift as SinonStub).calledWith(2));
-		assert.ok((channel.postMessage as SinonSpy).calledWith('dispatch', { items: [3] }));
+		assert.ok((dispatcher.dispatch as SinonSpy).calledWith([3]));
 	});
 });
 

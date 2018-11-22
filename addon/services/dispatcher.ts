@@ -12,19 +12,17 @@ interface WorkerInterface {
 }
 export interface DispatcherInterface extends Service {
 	collector: CollectorInterface;
-	dispatcherPath: string;
 	maxTimeout: number;
 	maxConcurrent: number;
 	isRunning: boolean;
 	isDispatching: boolean;
-	setOptions(options: any): void;
 	start(): Promise<void>;
 	stop(): Promise<void>;
+	dispatch(items: any[]): Promise<any[]>;
 }
 
-export default class Dispatcher extends Service {
-
-	public collector!: CollectorInterface;
+export default abstract class Dispatcher extends Service implements DispatcherInterface {
+	public abstract collector: CollectorInterface;
 	public dispatcherPath!: string;
 	public maxTimeout = MAX_TIMEOUT;
 	public maxConcurrent = MAX_CONCURRENT;
@@ -32,9 +30,7 @@ export default class Dispatcher extends Service {
 	public isDispatching = false;
 	public options!: Object;
 	private channel: ChannelInterface | undefined;
-
-	@service
-	public worker!: WorkerInterface;
+	public abstract dispatch(items: any[]): Promise<any[]>;
 
 	async start() {
 		if (!this.dispatcherPath) {
