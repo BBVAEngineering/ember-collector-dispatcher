@@ -1,6 +1,7 @@
 import EmberObject from '@ember/object';
 
 export interface StorageAdapterInterface extends EmberObject {
+	isSupported(): Boolean;
 	count(): Promise<number>;
 	push(...items: any[]): Promise<void>;
 	unshift(...items: any[]): Promise<void>;

@@ -17,6 +17,10 @@ export default class LocalStorage extends EmberObject implements LocalStorageInt
 		this.db.setItem(this.key, JSON.stringify([]));
 	}
 
+	isSupported(this: LocalStorage){
+		return true;
+	}
+
 	_setItems(this: LocalStorage, items: any[]){
 		return new Promise((resolve, reject) => {
 			let exception;

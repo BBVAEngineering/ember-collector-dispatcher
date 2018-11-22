@@ -12,6 +12,10 @@ export default class Memory extends EmberObject {
 		this.memory = [];
 	}
 
+	isSupported(this: Memory){
+		return true;
+	}
+
 	count(this: Memory) {
 		return new Promise((resolve) => resolve(this.memory.length));
 	}
