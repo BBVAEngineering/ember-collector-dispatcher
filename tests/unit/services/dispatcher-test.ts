@@ -1,4 +1,4 @@
-import { module, test, skip } from 'qunit';
+import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
 import sinon, { SinonStub, SinonSpy } from 'sinon';
 import { StorageAdapterInterface } from 'ember-iniesta/storage-adapters/storage-adapter';
@@ -73,22 +73,26 @@ module('Unit | Service | dispatcher', (hooks) => {
 		assert.ok(service);
 	});
 
-	skip('it has default values', (assert) => {
+	test('it has default values', (assert) => {
 		assert.notOk(service.isRunning, 'service is not running');
 		assert.notOk(service.isDispatching, 'service is not dispatching');
 		assert.equal(service.maxTimeout, MAX_TIMEOUT, 'value is expected');
 		assert.equal(service.maxConcurrent, MAX_CONCURRENT, 'value is expected');
 	});
 
-	skip('it throws an error when dispatcher path is empty', (assert) => {
+	test('it throws an error when dispatcher path is empty', async (assert) => {
 		service.dispatcherPath = '';
 
-		assert.throws(() => {
-			service.start();
-		});
+		try {
+			await service.start();
+
+			assert.ok(false, 'not expected branch');
+		} catch (e) {
+			assert.ok(e instanceof Error, 'error is expected');
+		}
 	});
 
-	skip('it starts dispatcher', async(assert) => {
+	test('it starts dispatcher', async(assert) => {
 		const channel = new DummyChannel();
 		const options = { dispatcherPath };
 
@@ -99,10 +103,10 @@ module('Unit | Service | dispatcher', (hooks) => {
 
 		assert.ok(service.isRunning, 'service is running');
 		assert.ok((worker.open as SinonStub).calledWith('dispatcher'), 'worker is open');
-		assert.ok((channel.postMessage as SinonSpy).calledWith('install', { options }), 'worker is open');
+		assert.ok((channel.postMessage as SinonSpy).calledWith('install', { options }), 'channel is called');
 	});
 
-	skip('it stops dispatcher', async(assert) => {
+	test('it stops dispatcher', async(assert) => {
 		const channel = new DummyChannel();
 
 		channel.terminate = sandbox.spy();
@@ -115,7 +119,7 @@ module('Unit | Service | dispatcher', (hooks) => {
 		assert.ok((channel.terminate as SinonSpy).calledOnce);
 	});
 
-	skip('it dispatches on timeout when has items', async(assert) => {
+	test('it dispatches on timeout when has items', async(assert) => {
 		const channel = new DummyChannel();
 		const items = [1, 2, 3];
 
@@ -132,20 +136,20 @@ module('Unit | Service | dispatcher', (hooks) => {
 		assert.notOk((collector.shift as SinonStub).calledWith(50));
 		assert.notOk((channel.postMessage as SinonSpy).calledWith('dispatch', { items }));
 
-		sandbox.clock.tick(15000);
+		await sandbox.clock.tick(15000);
 
 		assert.notOk(service.isDispatching, 'service is not dispatching');
 		assert.notOk((collector.shift as SinonStub).calledWith(50));
 		assert.notOk((channel.postMessage as SinonSpy).calledWith('dispatch', { items }));
 
-		sandbox.clock.tick(15000);
+		await sandbox.clock.tick(15000);
 
 		assert.ok(service.isDispatching, 'service is dispatching');
 		assert.ok((collector.shift as SinonStub).calledWith(50));
 		assert.ok((channel.postMessage as SinonSpy).calledWith('dispatch', { items }));
 	});
 
-	skip('it does not dispatch on timeout when has no items', async(assert) => {
+	test('it does not dispatch on timeout when has no items', async(assert) => {
 		const channel = new DummyChannel();
 
 		service.maxTimeout = 30000;
@@ -155,13 +159,13 @@ module('Unit | Service | dispatcher', (hooks) => {
 
 		await service.start();
 
-		sandbox.clock.tick(30000);
+		await sandbox.clock.tick(30000);
 
 		assert.notOk(service.isDispatching, 'service is not dispatching');
-		assert.ok((channel.postMessage as SinonSpy).notCalled);
+		assert.notOk((channel.postMessage as SinonStub).calledWith('dispatch'), 'dispatcher is not called');
 	});
 
-	skip('it does not dispatches when is stopped', async(assert) => {
+	test('it does not dispatches when is stopped', async(assert) => {
 		const channel = new DummyChannel();
 		const items = [1, 2, 3];
 
@@ -175,14 +179,14 @@ module('Unit | Service | dispatcher', (hooks) => {
 		await service.start();
 		await service.stop();
 
-		sandbox.clock.tick(30000);
+		await sandbox.clock.tick(30000);
 
 		assert.notOk(service.isDispatching, 'service is not dispatching');
 		assert.ok((collector.shift as SinonStub).notCalled);
-		assert.ok((channel.postMessage as SinonSpy).notCalled);
+		assert.notOk((channel.postMessage as SinonStub).calledWith('dispatch'), 'dispatcher is not called');
 	});
 
-	skip('it gives options to dispatcher', async(assert) => {
+	test('it gives options to dispatcher', async(assert) => {
 		const channel = new DummyChannel();
 		const items = [1, 2, 3];
 		const options = { foo: 'bar' };
@@ -198,13 +202,13 @@ module('Unit | Service | dispatcher', (hooks) => {
 
 		await service.start();
 
-		sandbox.clock.tick(30000);
+		await sandbox.clock.tick(30000);
 
-		assert.notOk((collector.shift as SinonStub).calledWith(50));
+		assert.ok((collector.shift as SinonStub).calledWith(50));
 		assert.ok((channel.postMessage as SinonSpy).calledWith('dispatch', { items, options }));
 	});
 
-	skip('it dispatches multiple time when has enough items', async(assert) => {
+	test('it dispatches multiple time when has enough items', async(assert) => {
 		const channel = new DummyChannel();
 
 		service.maxTimeout = 30000;
@@ -219,12 +223,12 @@ module('Unit | Service | dispatcher', (hooks) => {
 
 		await service.start();
 
-		sandbox.clock.tick(30000);
+		await sandbox.clock.tick(30000);
 
 		assert.ok((collector.shift as SinonStub).calledWith(2));
 		assert.ok((channel.postMessage as SinonSpy).calledWith('dispatch', { items: [1, 2] }));
 
-		sandbox.clock.tick(30000);
+		await sandbox.clock.tick(30000);
 
 		assert.ok((collector.shift as SinonStub).calledWith(2));
 		assert.ok((channel.postMessage as SinonSpy).calledWith('dispatch', { items: [3] }));
