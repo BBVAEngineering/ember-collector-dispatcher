@@ -16,7 +16,7 @@ export interface IndexedDbInterface extends StorageAdapterInterface {
 export default class IndexedDb extends EmberObject implements IndexedDbInterface {
 	public database!: string;
 	private db: Dexie;
-	private table:  Dexie.Table<any, number>;
+	private table: Dexie.Table<any, number>;
 
 	constructor() {
 		super(...arguments);
@@ -33,7 +33,7 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 	}
 
 	async isSupported() {
-		return true;
+		return this.db.open().then(() => true, () => false);;
 	}
 
 	count(this: IndexedDb) {
@@ -50,12 +50,13 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 		const length = await this.count();
 
 		if (!length) {
-			return this.table.bulkAdd(items);
+			this.table.bulkAdd(items);
+			return;
 		};
 
 		const firstItem = await this.table.toCollection().first();
 
-		return this.db.transaction('rw', this.table, () => {
+		await this.db.transaction('rw', this.table, () => {
 			let _id = firstItem._id - 1;
 
 			items.reverse().forEach((item) => {
@@ -65,11 +66,11 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 		});
 	}
 
-	async _removeItem(this: IndexedDb, pop?: boolean){
+	async _removeItem(this: IndexedDb, pop?: boolean) {
 		const collection = await this.table.toCollection();
 		const currentItem = pop ? await collection.last() : await collection.first();
 
-		if (isPresent(currentItem)){
+		if (isPresent(currentItem)) {
 			return this.table.delete(currentItem._id).then(() => {
 				delete currentItem._id;
 				return [currentItem];
@@ -81,8 +82,8 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 
 	async pop(this: IndexedDb, count?: number) {
 		const times = count || 1;
-		let result = [];
-		for (let i = 0; i<times; i++){
+		let result: any[] = [];
+		for (let i = 0; i < times; i++) {
 			const item = await this._removeItem(true);
 			result = [...result, ...item];
 		}
@@ -91,8 +92,8 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 
 	async shift(this: IndexedDb, count?: number) {
 		const times = count || 1;
-		let result = [];
-		for (let i = 0; i<times; i++){
+		let result: any[] = [];
+		for (let i = 0; i < times; i++) {
 			const item = await this._removeItem();
 			result = [...result, ...item];
 		}

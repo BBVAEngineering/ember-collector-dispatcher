@@ -1,6 +1,5 @@
 import { StorageAdapterInterface } from './storage-adapter';
 import EmberObject from '@ember/object';
-import { isPresent } from '@ember/utils';
 
 export interface LocalStorageInterface extends StorageAdapterInterface {
 	key: string;
@@ -14,23 +13,21 @@ export default class LocalStorage extends EmberObject implements LocalStorageInt
 		super(...arguments);
 
 		this.db = window.localStorage;
-		this.db.setItem(this.key, JSON.stringify([]));
 	}
 
 	async isSupported() {
+		try {
+			window.localStorage.setItem('supported', '0');
+			window.localStorage.removeItem('supported');
+		} catch (e) {
+			return false;
+		}
+
 		return true;
 	}
 
-	_setItems(this: LocalStorage, items: any[]){
-		return new Promise((resolve, reject) => {
-			let exception;
-			try {
-				this.db.setItem(this.key, JSON.stringify(items))
-			} catch (e){
-				exception = e;
-			}
-			return isPresent(exception) ? reject(exception) : resolve();
-		});
+	async _setItems(this: LocalStorage, items: any[]){
+		this.db.setItem(this.key, JSON.stringify(items))
 	}
 
 	_getItems(this: LocalStorage){
@@ -39,40 +36,44 @@ export default class LocalStorage extends EmberObject implements LocalStorageInt
 		return storage ? JSON.parse(storage) : [];
 	}
 
-	count(this: LocalStorage) {
-		return new Promise((resolve) => resolve(this._getItems().length));
+	async count(this: LocalStorage) {
+		return this._getItems().length;
 	}
 
-	push(this: LocalStorage, ...items: any[]) {
+	async push(this: LocalStorage, ...items: any[]) {
 		const storedItems = this._getItems();
 
 		items.forEach((item) => { storedItems.push(item); });
 
-		return this._setItems(storedItems);
+		await this._setItems(storedItems);
 	}
 
-	unshift(this: LocalStorage, ...items: any[]) {
+	async unshift(this: LocalStorage, ...items: any[]) {
 		const storedItems = this._getItems();
 
 		items.forEach((item) => { storedItems.unshift(item); });
 
-		return this._setItems(storedItems);
+		await this._setItems(storedItems);
 	}
 
-	pop(this: LocalStorage, count?: number) {
+	async pop(this: LocalStorage, count?: number) {
 		const times = count || 1;
 		const storedItems = this._getItems();
 		const items = storedItems.splice(-times);
 
-		return this._setItems(storedItems).then(() => items);
+		await this._setItems(storedItems);
+
+		return items;
 	}
 
-	shift(this: LocalStorage, count?: number) {
+	async shift(this: LocalStorage, count?: number) {
 		const times = count || 1;
 		const storedItems = this._getItems();
 		const items = storedItems.splice(0, times);
 
-		return this._setItems(storedItems).then(() => items);
+		await  this._setItems(storedItems);
+
+		return items;
 	}
 }
 

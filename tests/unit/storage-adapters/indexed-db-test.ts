@@ -21,7 +21,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 
 	setupTest(hooks);
 
-	hooks.beforeEach(async function(this: TestContext) {
+	hooks.beforeEach(async function (this: TestContext) {
 		const factory = this.owner.factoryFor('storage-adapter:indexed-db');
 
 		storage = factory.create({ database: dbName });
@@ -29,19 +29,21 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 		table = await setupIndexedDb(dbName);
 	});
 
-	hooks.afterEach(async() => {
-		await table.clear();
+	hooks.afterEach(async () => {
+		if(table.schema){
+			await table.clear();
+		}
 	});
 
 	test('it exists', (assert) => {
 		assert.ok(storage, 'service exists');
 	});
 
-	test('it is supported', (assert) => {
-		assert.ok(storage.isSupported(), 'storage is supported');
+	test('it is supported', async (assert) => {
+		assert.ok(await storage.isSupported(), 'storage is supported');
 	});
 
-	test('it checks when is not supported', async function(this: TestContext, assert) {
+	test('it checks when is not supported', async function (this: TestContext, assert) {
 		const indexedDB = Dexie.dependencies.indexedDB;
 
 		Dexie.dependencies.indexedDB = (null as unknown) as IDBFactory;
@@ -55,7 +57,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 		Dexie.dependencies.indexedDB = indexedDB;
 	});
 
-	test('it returns count of items', async(assert) => {
+	test('it returns count of items', async (assert) => {
 		await table.bulkAdd([{ _id: 1 }, { _id: 2 }]);
 
 		const count = await storage.count();
@@ -63,7 +65,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 		assert.equal(count, 2, 'count is expected');
 	});
 
-	test('it pushes an item', async(assert) => {
+	test('it pushes an item', async (assert) => {
 		await storage.push({ foo: 'bar' });
 
 		const count = await table.count();
@@ -71,7 +73,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 		assert.equal(count, 1, 'item exists');
 	});
 
-	test('it pushes several items', async(assert) => {
+	test('it pushes several items', async (assert) => {
 		await storage.push({ foo: 'bar' }, { bar: 'foo' });
 
 		const count = await table.count();
@@ -79,7 +81,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 		assert.equal(count, 2, 'items exist');
 	});
 
-	test('it unshifts an item', async(assert) => {
+	test('it unshifts an item', async (assert) => {
 		await storage.unshift({ foo: 'bar' });
 
 		const count = await table.count();
@@ -87,7 +89,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 		assert.equal(count, 1, 'item exists');
 	});
 
-	test('it unshifts several items', async(assert) => {
+	test('it unshifts several items', async (assert) => {
 		await storage.unshift({ foo: 'bar' }, { bar: 'foo' });
 
 		const count = await table.count();
@@ -95,7 +97,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 		assert.equal(count, 2, 'items exist');
 	});
 
-	test('it pushes an item and pops once', async(assert) => {
+	test('it pushes an item and pops once', async (assert) => {
 		await storage.push({ foo: 'bar' });
 
 		const item = await storage.pop();
@@ -103,7 +105,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 		assert.deepEqual(item, [{ foo: 'bar' }], 'item is expected');
 	});
 
-	test('it pushes items and pops once', async(assert) => {
+	test('it pushes items and pops once', async (assert) => {
 		await storage.push({ foo: 'bar' }, { bar: 'foo' });
 
 		const item = await storage.pop();
@@ -111,7 +113,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 		assert.deepEqual(item, [{ bar: 'foo' }], 'item is expected');
 	});
 
-	test('it pushes items and pops several times', async(assert) => {
+	test('it pushes items and pops several times', async (assert) => {
 		await storage.push({ foo: 'bar' }, { bar: 'foo' });
 
 		const item = await storage.pop(2);
@@ -119,7 +121,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 		assert.deepEqual(item, [{ bar: 'foo' }, { foo: 'bar' }], 'item is expected');
 	});
 
-	test('it pushes an item and shifts once', async(assert) => {
+	test('it pushes an item and shifts once', async (assert) => {
 		await storage.push({ foo: 'bar' });
 
 		const item = await storage.shift();
@@ -127,7 +129,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 		assert.deepEqual(item, [{ foo: 'bar' }], 'item is expected');
 	});
 
-	test('it pushes items and shifts once', async(assert) => {
+	test('it pushes items and shifts once', async (assert) => {
 		await storage.push({ foo: 'bar' }, { bar: 'foo' });
 
 		const item = await storage.shift();
@@ -135,7 +137,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 		assert.deepEqual(item, [{ foo: 'bar' }], 'item is expected');
 	});
 
-	test('it pushes items and shifts several times', async(assert) => {
+	test('it pushes items and shifts several times', async (assert) => {
 		await storage.push({ foo: 'bar' }, { bar: 'foo' });
 
 		const item = await storage.shift(2);

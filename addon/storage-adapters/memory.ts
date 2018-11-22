@@ -16,37 +16,28 @@ export default class Memory extends EmberObject {
 		return true;
 	}
 
-	count(this: Memory) {
-		return new Promise((resolve) => resolve(this.memory.length));
+	async count(this: Memory) {
+		return this.memory.length;
 	}
 
-	push(this: Memory, ...items: any[]) {
-		return new Promise((resolve) => {
-			items.forEach((item) => { this.memory.push(item); });
-			resolve();
-		});
+	async push(this: Memory, ...items: any[]) {
+		items.forEach((item) => this.memory.push(item));
 	}
 
-	unshift(this: Memory, ...items: any[]) {
-		return new Promise((resolve) => {
-			items.forEach((item) => { this.memory.unshift(item); });
-
-			resolve();
-		});
+	async unshift(this: Memory, ...items: any[]) {
+		items.forEach((item) => this.memory.unshift(item));
 	}
 
-	pop(this: Memory, count?: number) {
-		return new Promise((resolve) => {
-			const times = count || 1;
-			resolve(this.memory.splice(-times));
-		});
+	async pop(this: Memory, count?: number) {
+		const times = count || 1;
+
+		return this.memory.splice(-times);
 	}
 
-	shift(this: Memory, count?: number) {
-		return new Promise((resolve) => {
-			const times = count || 1;
-			resolve(this.memory.splice(0, times));
-		});
+	async shift(this: Memory, count?: number) {
+		const times = count || 1;
+
+		return this.memory.splice(0, times);
 	}
 
 }
