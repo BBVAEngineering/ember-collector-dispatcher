@@ -42,6 +42,8 @@
     "postpublish": "ember ts:clean"
   },
   "dependencies": {
+    "broccoli-babel-transpiler": "^6.5.0",
+    "broccoli-concat": "^3.7.3",
     "broccoli-funnel": "^2.0.1",
     "broccoli-merge-trees": "^3.0.1",
     "dexie": "^2.0.4",
