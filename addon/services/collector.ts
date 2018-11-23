@@ -4,6 +4,7 @@ import { getOwner } from '@ember/application';
 
 export interface CollectorInterface extends Service {
 	storageAdapter: StorageAdapterInterface;
+	setup(): Promise<void>;
 	count(): Promise<number>;
 	push(...items: any[]): Promise<void>;
 	unshift(...items: any[]): Promise<void>;
