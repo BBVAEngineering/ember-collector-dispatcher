@@ -33,7 +33,7 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 	}
 
 	async isSupported() {
-		return this.db.open().then(() => true, () => false);;
+		return this.db.open().then(() => true, () => false);
 	}
 
 	count(this: IndexedDb) {
@@ -52,7 +52,7 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 		if (!length) {
 			this.table.bulkAdd(items);
 			return;
-		};
+		}
 
 		const firstItem = await this.table.toCollection().first();
 
@@ -83,8 +83,10 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 	async pop(this: IndexedDb, count?: number) {
 		const times = count || 1;
 		let result: any[] = [];
+
 		for (let i = 0; i < times; i++) {
 			const item = await this._removeItem(true);
+
 			result = [...result, ...item];
 		}
 		return result;
@@ -93,8 +95,10 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 	async shift(this: IndexedDb, count?: number) {
 		const times = count || 1;
 		let result: any[] = [];
+
 		for (let i = 0; i < times; i++) {
 			const item = await this._removeItem();
+
 			result = [...result, ...item];
 		}
 		return result;

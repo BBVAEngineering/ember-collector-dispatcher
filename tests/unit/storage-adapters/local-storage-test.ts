@@ -38,7 +38,7 @@ module('Unit | StorageAdapter | local-storage', (hooks) => {
 	});
 
 	hooks.afterEach(() => {
-		if(window.localStorage){
+		if (window.localStorage) {
 			window.localStorage.clear();
 		}
 	});

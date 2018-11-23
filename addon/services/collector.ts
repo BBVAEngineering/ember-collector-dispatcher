@@ -26,7 +26,7 @@ export default class Collector extends Service {
 		this.storageAdapter = this.getAdapter();
 	}
 
-	private async getAdapter(){
+	private async getAdapter() {
 		let supportedAdapter;
 		let options;
 
@@ -47,7 +47,8 @@ export default class Collector extends Service {
 	private async findAdapter() {
 		const owner = getOwner(this);
 		let supported;
-		for(let i = 0; i < this.adapters.length; i++) {
+
+		for (let i = 0; i < this.adapters.length; i++) {
 			const adapter = this.adapters[i];
 			const name = Array.isArray(adapter) ? adapter[0] : adapter;
 
@@ -88,7 +89,6 @@ export default class Collector extends Service {
 
 		return adapter.shift(count);
 	}
-
 }
 
 declare module '@ember/service' {

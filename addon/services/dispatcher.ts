@@ -38,17 +38,17 @@ export default abstract class Dispatcher extends Service implements DispatcherIn
 	}
 
 	waitAndSendMessage() {
-		setTimeout(async () => {
-			if(this.isRunning) {
+		setTimeout(async() => {
+			if (this.isRunning) {
 				this.isDispatching = true;
 
 				const items = await this.collector.shift(this.maxConcurrent);
 				const hasItems = items && items.length > 0;
 
-				if(hasItems) {
+				if (hasItems) {
 					const itemsReturned = await this.dispatch(items);
 
-					if(itemsReturned && itemsReturned.length > 0) {
+					if (itemsReturned && itemsReturned.length > 0) {
 						await this.collector.unshift(itemsReturned);
 					}
 

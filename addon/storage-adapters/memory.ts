@@ -39,6 +39,5 @@ export default class Memory extends EmberObject {
 
 		return this.memory.splice(0, times);
 	}
-
 }
 

@@ -26,11 +26,11 @@ export default class LocalStorage extends EmberObject implements LocalStorageInt
 		return true;
 	}
 
-	async _setItems(this: LocalStorage, items: any[]){
-		this.db.setItem(this.key, JSON.stringify(items))
+	async _setItems(this: LocalStorage, items: any[]) {
+		this.db.setItem(this.key, JSON.stringify(items));
 	}
 
-	_getItems(this: LocalStorage){
+	_getItems(this: LocalStorage) {
 		const storage = this.db.getItem(this.key);
 
 		return storage ? JSON.parse(storage) : [];
@@ -43,7 +43,7 @@ export default class LocalStorage extends EmberObject implements LocalStorageInt
 	async push(this: LocalStorage, ...items: any[]) {
 		const storedItems = this._getItems();
 
-		items.forEach((item) => { storedItems.push(item); });
+		items.forEach((item) => {storedItems.push(item);});
 
 		await this._setItems(storedItems);
 	}
@@ -51,7 +51,7 @@ export default class LocalStorage extends EmberObject implements LocalStorageInt
 	async unshift(this: LocalStorage, ...items: any[]) {
 		const storedItems = this._getItems();
 
-		items.forEach((item) => { storedItems.unshift(item); });
+		items.forEach((item) => {storedItems.unshift(item);});
 
 		await this._setItems(storedItems);
 	}
@@ -71,7 +71,7 @@ export default class LocalStorage extends EmberObject implements LocalStorageInt
 		const storedItems = this._getItems();
 		const items = storedItems.splice(0, times);
 
-		await  this._setItems(storedItems);
+		await this._setItems(storedItems);
 
 		return items;
 	}
