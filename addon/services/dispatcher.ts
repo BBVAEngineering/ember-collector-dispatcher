@@ -1,22 +1,67 @@
 import Service from '@ember/service';
-import RSVP from 'rsvp';
+import { resolve } from 'rsvp';
+import { MAX_TIMEOUT, MAX_CONCURRENT } from '../constants';
 import { CollectorInterface } from './collector';
-
 export interface DispatcherInterface extends Service {
 	collector: CollectorInterface;
+	maxTimeout: number;
+	maxConcurrent: number;
 	isRunning: boolean;
 	isDispatching: boolean;
-	setOptions: void;
-	start(): RSVP.Promise<undefined>;
-	stop(): RSVP.Promise<undefined>;
+	start(): Promise<void>;
+	stop(): Promise<void>;
+	dispatch(items: any[]): Promise<any[]>;
 }
+export default abstract class Dispatcher extends Service implements DispatcherInterface {
+	public abstract collector: CollectorInterface;
+	public maxTimeout = MAX_TIMEOUT;
+	public maxConcurrent = MAX_CONCURRENT;
+	public isRunning = false;
+	public isDispatching = false;
+	public options!: Object;
+	public abstract dispatch(items: any[]): Promise<any[]>;
 
-export default class Dispatcher extends Service {
+	async start() {
+		this.isRunning = true;
 
+		this.waitAndSendMessage();
+	}
+
+	async stop() {
+		this.isRunning = false;
+
+		resolve();
+	}
+
+	setOptions(options: Object) {
+		this.options = { options };
+	}
+
+	waitAndSendMessage() {
+		setTimeout(async () => {
+			if(this.isRunning) {
+				this.isDispatching = true;
+
+				const items = await this.collector.shift(this.maxConcurrent);
+				const hasItems = items && items.length > 0;
+
+				if(hasItems) {
+					const itemsReturned = await this.dispatch(items);
+
+					if(itemsReturned && itemsReturned.length > 0) {
+						await this.collector.unshift(itemsReturned);
+					}
+
+					this.waitAndSendMessage();
+				}
+
+				this.isDispatching = false;
+			}
+		}, this.maxTimeout);
+	}
 }
-
 declare module '@ember/service' {
-  interface Registry {
-    'dispatcher': DispatcherInterface;
-  }
+	interface Registry {
+		'dispatcher': DispatcherInterface;
+	}
 }

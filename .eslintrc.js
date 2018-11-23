@@ -9,7 +9,8 @@ module.exports = {
 		sourceType: 'module'
 	},
 	plugins: [
-		'ember'
+		'ember',
+		'typescript'
 	],
 	extends: 'eslint-config-bbva',
 	env: {

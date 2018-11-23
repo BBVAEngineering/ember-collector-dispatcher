@@ -6,6 +6,13 @@ const fastbootTransform = require('fastboot-transform');
 const Funnel = require('broccoli-funnel');
 const MergeTrees = require('broccoli-merge-trees');
 const path = require('path');
+const concat = require('broccoli-concat');
+
+function processBabel(tree, options) {
+	const Babel = require('broccoli-babel-transpiler');
+
+	return new Babel(tree, options);
+}
 
 module.exports = {
 	name: 'ember-iniesta',
