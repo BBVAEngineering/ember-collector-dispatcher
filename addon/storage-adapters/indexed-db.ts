@@ -66,7 +66,7 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 		});
 	}
 
-	async _removeItem(this: IndexedDb, pop?: boolean) {
+	private async removeItem(this: IndexedDb, pop?: boolean) {
 		const collection = await this.table.toCollection();
 		const currentItem = pop ? await collection.last() : await collection.first();
 
@@ -85,7 +85,7 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 		let result: any[] = [];
 
 		for (let i = 0; i < times; i++) {
-			const item = await this._removeItem(true);
+			const item = await this.removeItem(true);
 
 			result = [...result, ...item];
 		}
@@ -97,7 +97,7 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 		let result: any[] = [];
 
 		for (let i = 0; i < times; i++) {
-			const item = await this._removeItem();
+			const item = await this.removeItem();
 
 			result = [...result, ...item];
 		}
