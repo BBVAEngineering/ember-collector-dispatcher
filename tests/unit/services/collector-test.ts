@@ -57,8 +57,8 @@ module('Unit | Service | collector', (hooks) => {
 		Factory = this.owner.factoryFor('service:collector');
 	});
 
-	hooks.beforeEach(() => {
-		sandbox.restore();
+	hooks.afterEach(() => {
+		sandbox.reset();
 	});
 
 	test('it exists', (assert) => {
@@ -94,7 +94,7 @@ module('Unit | Service | collector', (hooks) => {
 	test('it setups first supported adapter', async(assert) => {
 		const adapters = [
 			['dummy', { supported: false }],
-			'dummy'
+			['dummy', { supported: true }]
 		];
 		const service = Factory.create({ adapters });
 
