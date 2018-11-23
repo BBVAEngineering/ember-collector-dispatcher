@@ -2,9 +2,10 @@ import Service from '@ember/service';
 import { StorageAdapterInterface } from '../storage-adapters/storage-adapter';
 import { getOwner } from '@ember/application';
 
+export type AdapterConfiguration = string | [string, any];
+
 export interface CollectorInterface extends Service {
-	storageAdapter: StorageAdapterInterface;
-	setup(): Promise<StorageAdapterInterface>;
+	adapters: AdapterConfiguration[]
 	count(): Promise<number>;
 	push(...items: any[]): Promise<void>;
 	unshift(...items: any[]): Promise<void>;
@@ -13,25 +14,21 @@ export interface CollectorInterface extends Service {
 }
 
 export default abstract class Collector extends Service implements CollectorInterface {
-	public storageAdapter!: StorageAdapterInterface;
-	public adapters!: any[];
+	public abstract adapters: any[];
+	private storageAdapter!: StorageAdapterInterface;
 
-	async setup() {
+	private async setup() {
 		if (!this.adapters) {
 			throw new Error('You must define `adapters` property on your configuration');
 		}
 
-		if (!this.storageAdapter) {
-			const supportedAdapter = await this.getAdapter();
+		const supportedAdapter = await this.getAdapter();
 
-			if (!supportedAdapter) {
-				throw new Error('You must define any supported adapter: indexed-db, local-storage or memory');
-			}
-
-			this.storageAdapter = supportedAdapter;
+		if (!supportedAdapter) {
+			throw new Error('You must define any supported adapter: indexed-db, local-storage or memory');
 		}
 
-		return this.storageAdapter;
+		this.storageAdapter = supportedAdapter;
 	}
 
 	private async getAdapter() {
@@ -61,33 +58,43 @@ export default abstract class Collector extends Service implements CollectorInte
 	}
 
 	async count() {
-		const adapter = await this.setup();
+		if (!this.storageAdapter) {
+			await this.setup();
+		}
 
-		return adapter.count();
+		return this.storageAdapter.count();
 	}
 
 	async push(...items: any[]) {
-		const adapter = await this.setup();
+		if (!this.storageAdapter) {
+			await this.setup();
+		}
 
-		return adapter.push(...items);
+		return this.storageAdapter.push(...items);
 	}
 
 	async unshift(...items: any[]) {
-		const adapter = await this.setup();
+		if (!this.storageAdapter) {
+			await this.setup();
+		}
 
-		return adapter.unshift(...items);
+		return this.storageAdapter.unshift(...items);
 	}
 
 	async pop(count?: number) {
-		const adapter = await this.setup();
+		if (!this.storageAdapter) {
+			await this.setup();
+		}
 
-		return adapter.pop(count);
+		return this.storageAdapter.pop(count);
 	}
 
 	async shift(count?: number) {
-		const adapter = await this.setup();
+		if (!this.storageAdapter) {
+			await this.setup();
+		}
 
-		return adapter.shift(count);
+		return this.storageAdapter.shift(count);
 	}
 }
 

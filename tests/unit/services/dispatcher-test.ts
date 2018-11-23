@@ -1,7 +1,6 @@
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
 import sinon, { SinonStub, SinonSpy } from 'sinon';
-import { StorageAdapterInterface } from 'ember-iniesta/storage-adapters/storage-adapter';
 import { CollectorInterface } from 'ember-iniesta/services/collector';
 import Dispatcher, { DispatcherInterface } from 'ember-iniesta/services/dispatcher';
 import Service from '@ember/service';
@@ -22,19 +21,15 @@ module('Unit | Service | dispatcher', (hooks) => {
 	let dispatcher: DispatcherInterface;
 
 	class DummyCollector extends Service implements CollectorInterface {
-		public storageAdapter!: StorageAdapterInterface
+		adapters = [];
 		async count() {
 			return 0;
 		}
-		async push() {
-			return true;
-		}
+		async push() {}
 		async pop() {
 			return [];
 		}
-		async unshift() {
-			return true;
-		}
+		async unshift() {}
 		async shift() {
 			return [];
 		}

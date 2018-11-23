@@ -71,7 +71,7 @@ module('Unit | Service | collector', (hooks) => {
 		const service = Factory.create({ adapters: null });
 
 		try {
-			await service.setup();
+			await service.count();
 
 			assert.ok(false, 'unexpected branch');
 		} catch (e) {
@@ -83,7 +83,7 @@ module('Unit | Service | collector', (hooks) => {
 		const service = Factory.create({ adapters: [] });
 
 		try {
-			await service.setup();
+			await service.count();
 
 			assert.ok(false, 'unexpected branch');
 		} catch (e) {
@@ -98,7 +98,7 @@ module('Unit | Service | collector', (hooks) => {
 		];
 		const service = Factory.create({ adapters });
 
-		await service.setup();
+		await service.count();
 
 		assert.equal(await service.count(), 1);
 	});
@@ -111,7 +111,7 @@ module('Unit | Service | collector', (hooks) => {
 		const service = Factory.create({ adapters });
 
 		try {
-			await service.setup();
+			await service.count();
 
 			assert.ok(false, 'unexpected branch');
 		} catch (e) {
