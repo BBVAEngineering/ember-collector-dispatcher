@@ -49,7 +49,6 @@ module('Unit | Service | collector', (hooks) => {
 		shift = shift;
 	}
 
-
 	hooks.beforeEach(function(this: TestContext) {
 		this.owner.register('storage-adapter:dummy', DummyStorageAdapter);
 		this.owner.register('storage-adapter:stub', StubStorageAdapter);

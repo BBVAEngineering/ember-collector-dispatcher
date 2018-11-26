@@ -1,7 +1,7 @@
 import Service from '@ember/service';
-import { resolve } from 'rsvp';
 import { MAX_TIMEOUT, MAX_CONCURRENT } from '../constants';
 import { CollectorInterface } from './collector';
+
 export interface DispatcherInterface extends Service {
 	collector: CollectorInterface;
 	maxTimeout: number;
@@ -12,13 +12,13 @@ export interface DispatcherInterface extends Service {
 	stop(): Promise<void>;
 	dispatch(items: any[]): Promise<any[]>;
 }
+
 export default abstract class Dispatcher extends Service implements DispatcherInterface {
 	public abstract collector: CollectorInterface;
 	public maxTimeout = MAX_TIMEOUT;
 	public maxConcurrent = MAX_CONCURRENT;
 	public isRunning = false;
 	public isDispatching = false;
-	public options!: Object;
 	public abstract dispatch(items: any[]): Promise<any[]>;
 
 	async start() {
@@ -29,15 +29,9 @@ export default abstract class Dispatcher extends Service implements DispatcherIn
 
 	async stop() {
 		this.isRunning = false;
-
-		resolve();
 	}
 
-	setOptions(options: Object) {
-		this.options = { options };
-	}
-
-	waitAndSendMessage() {
+	private waitAndSendMessage() {
 		setTimeout(async() => {
 			if (this.isRunning) {
 				this.isDispatching = true;
@@ -60,6 +54,7 @@ export default abstract class Dispatcher extends Service implements DispatcherIn
 		}, this.maxTimeout);
 	}
 }
+
 declare module '@ember/service' {
 	interface Registry {
 		'dispatcher': DispatcherInterface;

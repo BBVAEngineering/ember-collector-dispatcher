@@ -57,6 +57,14 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 		Dexie.dependencies.indexedDB = indexedDB;
 	});
 
+	test('it throws an error when database is not defined', async function(this: TestContext, assert) {
+		const factory = this.owner.factoryFor('storage-adapter:indexed-db');
+
+		assert.throws(() => {
+			factory.create({ database: null });
+		});
+	});
+
 	test('it returns count of items', async(assert) => {
 		await table.bulkAdd([{ _id: 1 }, { _id: 2 }]);
 

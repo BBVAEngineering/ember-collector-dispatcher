@@ -1,3 +1,0 @@
-self.dispatcher = function() {
-	return [];
-};

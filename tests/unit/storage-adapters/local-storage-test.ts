@@ -65,6 +65,14 @@ module('Unit | StorageAdapter | local-storage', (hooks) => {
 		Object.defineProperty(window, 'localStorage', { value: localStorage });
 	});
 
+	test('it throws an error when key is not defined', async function(this: TestContext, assert) {
+		const factory = this.owner.factoryFor('storage-adapter:local-storage');
+
+		assert.throws(() => {
+			factory.create({ key: null });
+		});
+	});
+
 	test('it returns count of items', async(assert) => {
 		setItems([{ _id: 1 }, { _id: 2 }]);
 
