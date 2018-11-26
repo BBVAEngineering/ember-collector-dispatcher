@@ -1,13 +1,13 @@
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
 import { TestContext } from 'ember-test-helpers';
-import Collector, { CollectorInterface } from 'ember-iniesta/services/collector';
-import Dispatcher, { DispatcherInterface } from 'ember-iniesta/services/dispatcher';
+import Collector, { CollectorInterface } from 'ember-collector-dispatcher/services/collector';
+import Dispatcher, { DispatcherInterface } from 'ember-collector-dispatcher/services/dispatcher';
 import sinon, { SinonStub } from 'sinon';
 import { service } from '@ember-decorators/service';
 import waitUntil from '@ember/test-helpers/wait-until';
 import Dexie from 'dexie';
-import { schema, version, tableName } from 'ember-iniesta/storage-adapters/indexed-db';
+import { schema, version, tableName } from 'ember-collector-dispatcher/storage-adapters/indexed-db';
 
 declare module '@ember/service' {
 	interface Registry {

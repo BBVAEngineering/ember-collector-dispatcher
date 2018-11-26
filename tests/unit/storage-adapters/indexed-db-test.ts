@@ -1,7 +1,7 @@
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
 import { TestContext } from 'ember-test-helpers';
-import { IndexedDbInterface, schema, version, tableName } from 'ember-iniesta/storage-adapters/indexed-db';
+import { IndexedDbInterface, schema, version, tableName } from 'ember-collector-dispatcher/storage-adapters/indexed-db';
 import Dexie from 'dexie';
 
 async function setupIndexedDb(dbName: string) {

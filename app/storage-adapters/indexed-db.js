@@ -1,1 +1,1 @@
-export { default } from 'ember-iniesta/storage-adapters/indexed-db';
+export { default } from 'ember-collector-dispatcher/storage-adapters/indexed-db';

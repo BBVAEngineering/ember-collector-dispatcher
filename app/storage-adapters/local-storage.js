@@ -1,1 +1,1 @@
-export { default } from 'ember-iniesta/storage-adapters/local-storage';
+export { default } from 'ember-collector-dispatcher/storage-adapters/local-storage';

@@ -1,7 +1,7 @@
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
 import { TestContext } from 'ember-test-helpers';
-import { LocalStorageInterface } from 'ember-iniesta/storage-adapters/local-storage';
+import { LocalStorageInterface } from 'ember-collector-dispatcher/storage-adapters/local-storage';
 
 module('Unit | StorageAdapter | local-storage', (hooks) => {
 	const dbName = 'database';

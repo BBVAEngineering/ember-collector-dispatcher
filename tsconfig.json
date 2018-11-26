@@ -27,16 +27,16 @@
         "tests/dummy/app/*",
         "app/*"
       ],
-      "ember-iniesta": [
+      "ember-collector-dispatcher": [
         "addon"
       ],
-      "ember-iniesta/*": [
+      "ember-collector-dispatcher/*": [
         "addon/*"
       ],
-      "ember-iniesta/test-support": [
+      "ember-collector-dispatcher/test-support": [
         "addon-test-support"
       ],
-      "ember-iniesta/test-support/*": [
+      "ember-collector-dispatcher/test-support/*": [
         "addon-test-support/*"
       ],
       "*": [

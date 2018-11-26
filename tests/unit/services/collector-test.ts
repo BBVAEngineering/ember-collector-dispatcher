@@ -1,9 +1,9 @@
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
-import { StorageAdapterInterface } from 'ember-iniesta/storage-adapters/storage-adapter';
+import { StorageAdapterInterface } from 'ember-collector-dispatcher/storage-adapters/storage-adapter';
 import EmberObject from '@ember/object';
 import { TestContext } from 'ember-test-helpers';
-import { CollectorInterface } from 'ember-iniesta/services/collector';
+import { CollectorInterface } from 'ember-collector-dispatcher/services/collector';
 import sinon from 'sinon';
 
 interface EmberFactory<T> {

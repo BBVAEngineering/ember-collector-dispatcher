@@ -15,7 +15,7 @@ function processBabel(tree, options) {
 }
 
 module.exports = {
-	name: 'ember-iniesta',
+	name: 'ember-collector-dispatcher',
 
 	included(app) {
 		this._super.included(app);

@@ -1,1 +1,1 @@
-export { default } from 'ember-iniesta/services/dispatcher';
+export { default } from 'ember-collector-dispatcher/services/dispatcher';

@@ -1,1 +1,1 @@
-export { default } from 'ember-iniesta/storage-adapters/memory';
+export { default } from 'ember-collector-dispatcher/storage-adapters/memory';
