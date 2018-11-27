@@ -7,10 +7,10 @@ export interface LocalStorageInterface extends StorageAdapterInterface {
 
 export default class LocalStorage extends EmberObject implements LocalStorageInterface {
 	public key!: string;
-	private db: Storage;
+	private db!: Storage;
 
-	constructor() {
-		super(...arguments);
+	init() {
+		this._super(...arguments);
 
 		if (!this.key) {
 			throw new Error('LocalStorage storage adapter needs a key');

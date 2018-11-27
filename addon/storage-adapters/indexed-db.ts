@@ -15,11 +15,11 @@ export interface IndexedDbInterface extends StorageAdapterInterface {
 
 export default class IndexedDb extends EmberObject implements IndexedDbInterface {
 	public database!: string;
-	private db: Dexie;
-	private table: Dexie.Table<any, number>;
+	private db!: Dexie;
+	private table!: Dexie.Table<any, number>;
 
-	constructor() {
-		super(...arguments);
+	init() {
+		this._super(...arguments);
 
 		if (!this.database) {
 			throw new Error('IndexedDB storage adapter needs a database');
