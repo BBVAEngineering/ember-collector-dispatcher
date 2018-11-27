@@ -21,8 +21,8 @@ export default class LocalStorage extends EmberObject implements LocalStorageInt
 
 	async isSupported() {
 		try {
-			window.localStorage.setItem('supported', '0');
-			window.localStorage.removeItem('supported');
+			this.db.setItem('supported', '0');
+			this.db.removeItem('supported');
 		} catch (e) {
 			return false;
 		}
@@ -47,7 +47,9 @@ export default class LocalStorage extends EmberObject implements LocalStorageInt
 	async push(this: LocalStorage, ...items: any[]) {
 		const storedItems = this.getItems();
 
-		items.forEach((item) => {storedItems.push(item);});
+		items.forEach((item) => {
+			storedItems.push(item);
+		});
 
 		await this.setItems(storedItems);
 	}
@@ -55,7 +57,9 @@ export default class LocalStorage extends EmberObject implements LocalStorageInt
 	async unshift(this: LocalStorage, ...items: any[]) {
 		const storedItems = this.getItems();
 
-		items.forEach((item) => {storedItems.unshift(item);});
+		items.forEach((item) => {
+			storedItems.unshift(item);
+		});
 
 		await this.setItems(storedItems);
 	}

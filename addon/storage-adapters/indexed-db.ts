@@ -44,10 +44,8 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 		return this.table.count();
 	}
 
-	push(this: IndexedDb, ...items: any[]) {
-		return this.db.transaction('rw', this.table, () => {
-			this.table.bulkAdd(items);
-		});
+	async push(this: IndexedDb, ...items: any[]) {
+		this.table.bulkAdd(items);
 	}
 
 	async unshift(this: IndexedDb, ...items: any[]) {
@@ -59,15 +57,14 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 		}
 
 		const firstItem = await this.table.toCollection().first();
+		let _id = firstItem._id - 1;
 
-		await this.db.transaction('rw', this.table, () => {
-			let _id = firstItem._id - 1;
-
-			items.reverse().forEach((item) => {
-				this.table.add(Object.assign({}, item, { _id }));
-				--_id;
-			});
+		items.reverse().forEach((item) => {
+			Object.assign(item, { _id });
+			--_id;
 		});
+
+		this.table.bulkAdd(items);
 	}
 
 	private async removeItem(this: IndexedDb, pop?: boolean) {
@@ -84,27 +81,31 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 		return [];
 	}
 
-	async pop(this: IndexedDb, count?: number) {
-		const times = count || 1;
+	async pop(this: IndexedDb, count: number = 1) {
 		let result: any[] = [];
 
-		for (let i = 0; i < times; i++) {
-			const item = await this.removeItem(true);
+		await this.db.transaction('rw', this.table, async () => {
+			for (let i = 0; i < count; i++) {
+				const item = await this.removeItem(true);
 
-			result = [...result, ...item];
-		}
+				result = [...result, ...item];
+			}
+		});
+
 		return result;
 	}
 
-	async shift(this: IndexedDb, count?: number) {
-		const times = count || 1;
+	async shift(this: IndexedDb, count: number = 1) {
 		let result: any[] = [];
 
-		for (let i = 0; i < times; i++) {
-			const item = await this.removeItem();
+		await this.db.transaction('rw', this.table, async () => {
+			for (let i = 0; i < count; i++) {
+				const item = await this.removeItem();
 
-			result = [...result, ...item];
-		}
+				result = [...result, ...item];
+			}
+		});
+
 		return result;
 	}
 }
