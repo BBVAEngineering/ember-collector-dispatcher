@@ -42,7 +42,6 @@
     "postpublish": "ember ts:clean"
   },
   "dependencies": {
-    "broccoli-concat": "^3.7.3",
     "broccoli-funnel": "^2.0.1",
     "broccoli-merge-trees": "^3.0.1",
     "dexie": "^2.0.4",
@@ -74,6 +73,7 @@
     "@types/rsvp": "^4.0.2",
     "@types/sinon": "^5.0.6",
     "acorn": "^6.0.4",
+    "babel-eslint": "^10.0.1",
     "broccoli-asset-rev": "^3.0.0",
     "commitizen": "^3.0.4",
     "cz-conventional-changelog": "^2.1.0",

@@ -43,7 +43,7 @@ export default abstract class Dispatcher extends Service implements DispatcherIn
 					const itemsReturned = await this.dispatch(items);
 
 					if (itemsReturned && itemsReturned.length > 0) {
-						await this.collector.unshift(itemsReturned);
+						await this.collector.unshift(...itemsReturned);
 					}
 
 					this.waitAndSendMessage();

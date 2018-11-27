@@ -16,36 +16,36 @@ module.exports = {
 	env: {
 		browser: true
 	},
-	rules: {
-		'no-unused-vars': 0
-	},
-	overrides: [
-		{
-			files: [
-				'.eslintrc.js',
-				'.template-lintrc.js',
-				'ember-cli-build.js',
-				'index.js',
-				'testem.js',
-				'blueprints/*/index.js',
-				'config/**/*.js',
-				'tests/dummy/config/**/*.js'
-			],
-			excludedFiles: [
-				'addon/**',
-				'addon-test-support/**',
-				'app/**',
-				'tests/dummy/app/**'
-			],
-			parserOptions: {
-				sourceType: 'script',
-				ecmaVersion: 2015
-			},
-			env: {
-				browser: false,
-				node: true
-			},
-			plugins: ['node']
+	overrides: [{
+		files: ['**/*.ts'],
+		rules: {
+			'no-unused-vars': 0
 		}
-	]
+	}, {
+		files: [
+			'.eslintrc.js',
+			'.template-lintrc.js',
+			'ember-cli-build.js',
+			'index.js',
+			'testem.js',
+			'blueprints/*/index.js',
+			'config/**/*.js',
+			'tests/dummy/config/**/*.js'
+		],
+		excludedFiles: [
+			'addon/**',
+			'addon-test-support/**',
+			'app/**',
+			'tests/dummy/app/**'
+		],
+		parserOptions: {
+			sourceType: 'script',
+			ecmaVersion: 2015
+		},
+		env: {
+			browser: false,
+			node: true
+		},
+		plugins: ['node']
+	}]
 };

@@ -91,7 +91,7 @@ module('Integration | index', (hooks) => {
 
 		await waitUntil(() => !dispatcher.isDispatching);
 
-		assert.equal(await collector.pop(), [item], 'collector has item');
+		assert.deepEqual(await collector.pop(), [item], 'collector has item');
 	});
 });
 

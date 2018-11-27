@@ -162,7 +162,7 @@ module('Unit | Service | dispatcher', (hooks) => {
 
 		await waitUntil(() => !dispatcher.isDispatching);
 
-		assert.ok((collector.unshift as SinonSpy).calledWith([1, 2]));
+		assert.ok((collector.unshift as SinonSpy).calledWith(1, 2));
 	});
 
 	test('it dispatches multiple time when has enough items', async(assert) => {

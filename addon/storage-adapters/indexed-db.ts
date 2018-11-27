@@ -21,6 +21,10 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 	constructor() {
 		super(...arguments);
 
+		if (!this.database) {
+			throw new Error('IndexedDB storage adapter needs a database');
+		}
+
 		const db = new Dexie(this.database);
 
 		db.version(version).stores(schema);

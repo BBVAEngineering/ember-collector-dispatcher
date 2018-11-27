@@ -12,6 +12,10 @@ export default class LocalStorage extends EmberObject implements LocalStorageInt
 	constructor() {
 		super(...arguments);
 
+		if (!this.key) {
+			throw new Error('LocalStorage storage adapter needs a key');
+		}
+
 		this.db = window.localStorage;
 	}
 
