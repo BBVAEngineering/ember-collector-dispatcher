@@ -5,6 +5,7 @@ import EmberObject from '@ember/object';
 import { TestContext } from 'ember-test-helpers';
 import { CollectorInterface } from 'ember-collector-dispatcher/services/collector';
 import sinon from 'sinon';
+import { begin, end } from '@ember/runloop';
 
 interface EmberFactory<T> {
 	create(...args: any[]): T
@@ -97,9 +98,11 @@ module('Unit | Service | collector', (hooks) => {
 		];
 		const service = Factory.create({ adapters });
 
-		await service.count();
+		begin(); // fix for lts versions
 
 		assert.equal(await service.count(), 1);
+
+		end();
 	});
 
 	test('it throws an error when there is no supported adapter', async(assert) => {
