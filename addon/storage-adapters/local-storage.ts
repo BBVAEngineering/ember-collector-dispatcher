@@ -64,20 +64,18 @@ export default class LocalStorage extends EmberObject implements LocalStorageInt
 		await this.setItems(storedItems);
 	}
 
-	async pop(this: LocalStorage, count?: number) {
-		const times = count || 1;
+	async pop(this: LocalStorage, count: number = 1) {
 		const storedItems = this.getItems();
-		const items = storedItems.splice(-times);
+		const items = storedItems.splice(-count);
 
 		await this.setItems(storedItems);
 
 		return items;
 	}
 
-	async shift(this: LocalStorage, count?: number) {
-		const times = count || 1;
+	async shift(this: LocalStorage, count: number = 1) {
 		const storedItems = this.getItems();
-		const items = storedItems.splice(0, times);
+		const items = storedItems.splice(0, count);
 
 		await this.setItems(storedItems);
 

@@ -28,16 +28,12 @@ export default class Memory extends EmberObject implements MemoryInterface {
 		items.forEach((item) => this.memory.unshift(item));
 	}
 
-	async pop(this: Memory, count?: number) {
-		const times = count || 1;
-
-		return this.memory.splice(-times);
+	async pop(this: Memory, count: number = 1) {
+		return this.memory.splice(-count);
 	}
 
-	async shift(this: Memory, count?: number) {
-		const times = count || 1;
-
-		return this.memory.splice(0, times);
+	async shift(this: Memory, count: number = 1) {
+		return this.memory.splice(0, count);
 	}
 }
 
