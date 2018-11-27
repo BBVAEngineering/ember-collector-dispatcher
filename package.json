@@ -39,7 +39,9 @@
     "check-coverage": "istanbul check-coverage coverage/coverage-final.json --statements 100 --functions 100 --branches 100 --lines 100",
     "commit": "git-cz",
     "prepublishOnly": "ember ts:precompile",
-    "postpublish": "ember ts:clean"
+    "postpublish": "ember ts:clean",
+    "semantic-release": "semantic-release",
+    "travis-deploy-once": "travis-deploy-once"
   },
   "dependencies": {
     "broccoli-funnel": "^2.0.1",
@@ -102,9 +104,10 @@
     "husky": "^1.0.0-rc.13",
     "istanbul": "^0.4.5",
     "loader.js": "^4.2.3",
-    "semantic-release": "^15.9.12",
+    "semantic-release": "^15.12.2",
     "typescript": "^3.1.6",
-    "typescript-eslint-parser": "^21.0.1"
+    "typescript-eslint-parser": "^21.0.1",
+    "travis-deploy-once": "^5.0.9"
   },
   "engines": {
     "node": "^4.5 || 6.* || >= 7.*"
