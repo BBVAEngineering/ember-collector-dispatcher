@@ -84,7 +84,7 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 	async pop(this: IndexedDb, count: number = 1) {
 		let result: any[] = [];
 
-		await this.db.transaction('rw', this.table, async () => {
+		await this.db.transaction('rw', this.table, async() => {
 			for (let i = 0; i < count; i++) {
 				const item = await this.removeItem(true);
 
@@ -98,7 +98,7 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 	async shift(this: IndexedDb, count: number = 1) {
 		let result: any[] = [];
 
-		await this.db.transaction('rw', this.table, async () => {
+		await this.db.transaction('rw', this.table, async() => {
 			for (let i = 0; i < count; i++) {
 				const item = await this.removeItem();
 
