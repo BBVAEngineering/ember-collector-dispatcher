@@ -72,10 +72,10 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 		const currentItem = pop ? await collection.last() : await collection.first();
 
 		if (isPresent(currentItem)) {
-			return this.table.delete(currentItem._id).then(() => {
-				delete currentItem._id;
-				return [currentItem];
-			});
+			await this.table.delete(currentItem._id);
+			delete currentItem._id;
+
+			return [currentItem];
 		}
 
 		return [];
