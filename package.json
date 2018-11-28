@@ -1,6 +1,6 @@
 {
   "name": "ember-collector-dispatcher",
-  "version": "0.0.0-development",
+  "version": "1.0.0",
   "description": "Collect and dispatch",
   "keywords": [
     "ember-addon"
