@@ -36,7 +36,7 @@
     "posttest": "npm run report-coverage && npm run check-coverage",
     "lint:js": "eslint --ext .js,.ts --max-warnings 0 ./*.js addon app config tests",
     "report-coverage": "istanbul report --include=coverage/coverage-final.json text",
-    "check-coverage": "istanbul check-coverage coverage/coverage-final.json --statements 100 --functions 100 --branches 100 --lines 100",
+    "check-coverage": "istanbul check-coverage coverage/coverage-final.json --statements 95 --functions 95 --branches 95 --lines 95",
     "commit": "git-cz",
     "prepublishOnly": "ember ts:precompile",
     "postpublish": "ember ts:clean",
