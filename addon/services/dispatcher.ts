@@ -15,11 +15,11 @@ export interface DispatcherInterface extends Service {
 
 export default abstract class Dispatcher extends Service implements DispatcherInterface {
 	public abstract collector: CollectorInterface;
-	public maxTimeout = MAX_TIMEOUT;
-	public maxConcurrent = MAX_CONCURRENT;
 	public isRunning = false;
 	public isDispatching = false;
 	public abstract dispatch(items: any[]): Promise<any[]>;
+	public maxTimeout: number = this.maxTimeout || MAX_TIMEOUT;
+	public maxConcurrent: number = this.maxConcurrent || MAX_CONCURRENT;
 
 	async start() {
 		this.isRunning = true;
