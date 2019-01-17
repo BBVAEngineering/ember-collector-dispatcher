@@ -67,6 +67,17 @@ module('Unit | Service | dispatcher', (hooks) => {
 		assert.equal(dispatcher.maxConcurrent, MAX_CONCURRENT, 'value is expected');
 	});
 
+	test('default values can be predefined', (assert) => {
+		const klass = DummyDispatcher.extend({
+			maxTimeout: 1,
+			maxConcurrent: 1
+		});
+		const instance = klass.create();
+
+		assert.equal(instance.maxTimeout, 1, 'maxTimeout is predefined');
+		assert.equal(instance.maxConcurrent, 1, 'maxConcurrent is predefined');
+	});
+
 	test('it starts dispatcher', async(assert) => {
 		await dispatcher.start();
 

@@ -3,7 +3,7 @@ import { setupTest } from 'ember-qunit';
 import { StorageAdapterInterface } from 'ember-collector-dispatcher/storage-adapters/storage-adapter';
 import EmberObject from '@ember/object';
 import { TestContext } from 'ember-test-helpers';
-import { CollectorInterface } from 'ember-collector-dispatcher/services/collector';
+import Collector, { CollectorInterface } from 'ember-collector-dispatcher/services/collector';
 import sinon from 'sinon';
 import { begin, end } from '@ember/runloop';
 
@@ -50,6 +50,10 @@ module('Unit | Service | collector', (hooks) => {
 		shift = shift;
 	}
 
+	class DummyCollector extends Collector implements CollectorInterface {
+		adapters: any[] = this.adapters || []
+	}
+
 	hooks.beforeEach(function(this: TestContext) {
 		this.owner.register('storage-adapter:dummy', DummyStorageAdapter);
 		this.owner.register('storage-adapter:stub', StubStorageAdapter);
@@ -65,6 +69,16 @@ module('Unit | Service | collector', (hooks) => {
 		const service = Factory.create();
 
 		assert.ok(service);
+	});
+
+	test('default values can be predefined', (assert) => {
+		const adapters: any[] = [];
+		const klass = DummyCollector.extend({
+			adapters
+		});
+		const instance = klass.create();
+
+		assert.equal(instance.adapters, adapters, 'adapters is predefined');
 	});
 
 	test('it throws an error when adapters is not defined', async(assert) => {
