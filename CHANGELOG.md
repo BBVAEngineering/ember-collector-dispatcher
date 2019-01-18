@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/BBVAEngineering/ember-collector-dispatcher/compare/v1.0.1...v1.0.2) (2019-01-18)
+
+
+### Bug Fixes
+
+* **dispatcher:** allow predefine properties on dispatcher ([ae607de](https://github.com/BBVAEngineering/ember-collector-dispatcher/commit/ae607de))
+
 ## [1.0.1](https://github.com/BBVAEngineering/ember-collector-dispatcher/compare/v1.0.0...v1.0.1) (2018-12-13)
 
 
