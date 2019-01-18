@@ -1,28 +1,25 @@
-/* eslint-env node */
 'use strict';
 
 module.exports = {
 	root: true,
-	parser: 'typescript-eslint-parser',
 	parserOptions: {
 		ecmaVersion: 2017,
 		sourceType: 'module'
 	},
 	plugins: [
-		'ember',
-		'typescript'
+		'ember'
 	],
-	extends: 'eslint-config-bbva',
+	extends: [
+		'plugin:ember/recommended',
+		'eslint-config-bbva'
+	],
 	env: {
 		browser: true
 	},
 	overrides: [{
-		files: ['**/*.ts'],
-		rules: {
-			'no-unused-vars': 0
-		}
-	}, {
 		files: [
+			'.huskyrc.js',
+			'.commitlintrc.js',
 			'.eslintrc.js',
 			'.template-lintrc.js',
 			'ember-cli-build.js',
@@ -46,6 +43,9 @@ module.exports = {
 			browser: false,
 			node: true
 		},
-		plugins: ['node']
+		plugins: ['node'],
+		rules: Object.assign({}, require('eslint-plugin-node').configs.recommended.rules, {
+			'no-process-env': 0
+		})
 	}]
 };
