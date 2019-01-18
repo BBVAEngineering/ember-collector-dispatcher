@@ -34,15 +34,13 @@
     "start": "ember server",
     "test": "COVERAGE=true ember test",
     "posttest": "npm run report-coverage && npm run check-coverage",
-    "lint:js": "eslint --max-warnings 0 ./*.js addon app config tests",
+    "lint:hbs": "ember-template-lint .",
+    "lint:js": "eslint --ext .js,.ts --max-warnings 0 ./*.js addon app config tests",
     "report-coverage": "istanbul report --include=coverage/coverage-final.json text",
-    "check-coverage": "istanbul check-coverage coverage/coverage-final.json --statements 100 --functions 100 --branches 100 --lines 100",
+    "check-coverage": "istanbul check-coverage coverage/coverage-final.json --statements 95 --functions 95 --branches 95 --lines 95",
     "commit": "git-cz",
     "prepublishOnly": "ember ts:precompile",
-    "postpublish": "ember ts:clean",
-    "semantic-release": "semantic-release",
-    "travis-deploy-once": "travis-deploy-once",
-    "lint:hbs": "ember-template-lint ."
+    "postpublish": "ember ts:clean"
   },
   "dependencies": {
     "broccoli-funnel": "^2.0.1",
@@ -54,12 +52,6 @@
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
-    }
-  },
-  "husky": {
-    "hooks": {
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-      "pre-push": "npm run lint:js && npm run test"
     }
   },
   "devDependencies": {
@@ -99,7 +91,7 @@
     "ember-sinon": "^3.1.0",
     "ember-source": "~3.7.0",
     "ember-source-channel-url": "^1.1.0",
-    "ember-try": "^1.1.0",
+    "ember-try": "~0.2.23",
     "eslint": "^5.12.0",
     "eslint-config-bbva": "^2.0.3",
     "eslint-plugin-ember": "^6.1.0",
@@ -110,7 +102,7 @@
     "loader.js": "^4.2.3",
     "semantic-release": "^15.13.3",
     "travis-deploy-once": "^5.0.11",
-    "typescript": "^3.2.4",
+    "typescript": "~3.1.1",
     "typescript-eslint-parser": "^21.0.2"
   },
   "engines": {

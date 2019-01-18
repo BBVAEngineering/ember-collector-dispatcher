@@ -2,12 +2,14 @@
 
 module.exports = {
 	root: true,
+	parser: 'typescript-eslint-parser',
 	parserOptions: {
 		ecmaVersion: 2017,
 		sourceType: 'module'
 	},
 	plugins: [
-		'ember'
+		'ember',
+		'typescript'
 	],
 	extends: [
 		'plugin:ember/recommended',
@@ -15,6 +17,9 @@ module.exports = {
 	],
 	env: {
 		browser: true
+	},
+	rules: {
+		'no-unused-vars': 0
 	},
 	overrides: [{
 		files: [

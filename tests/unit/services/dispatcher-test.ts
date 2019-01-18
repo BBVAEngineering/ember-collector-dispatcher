@@ -6,7 +6,7 @@ import Dispatcher, { DispatcherInterface } from 'ember-collector-dispatcher/serv
 import Service from '@ember/service';
 import { TestContext } from 'ember-test-helpers';
 import { MAX_TIMEOUT, MAX_CONCURRENT } from 'ember-collector-dispatcher/constants';
-import { service } from '@ember-decorators/service';
+import { inject } from '@ember-decorators/service';
 import waitUntil from '@ember/test-helpers/wait-until';
 
 declare module '@ember/service' {
@@ -36,7 +36,7 @@ module('Unit | Service | dispatcher', (hooks) => {
 	}
 
 	class DummyDispatcher extends Dispatcher {
-		@service('dummy-collector')
+		@inject('dummy-collector')
 		public collector!: CollectorInterface;
 
 		async dispatch(items: any[]) {

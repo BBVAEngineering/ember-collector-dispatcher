@@ -4,7 +4,7 @@ import { TestContext } from 'ember-test-helpers';
 import Collector, { CollectorInterface } from 'ember-collector-dispatcher/services/collector';
 import Dispatcher, { DispatcherInterface } from 'ember-collector-dispatcher/services/dispatcher';
 import sinon, { SinonStub } from 'sinon';
-import { service } from '@ember-decorators/service';
+import { inject } from '@ember-decorators/service';
 import waitUntil from '@ember/test-helpers/wait-until';
 import Dexie from 'dexie';
 import { schema, version, tableName } from 'ember-collector-dispatcher/storage-adapters/indexed-db';
@@ -41,7 +41,7 @@ module('Integration | index', (hooks) => {
 	}
 
 	class MainDispatcher extends Dispatcher {
-		@service('main-collector')
+		@inject('main-collector')
 		public collector!: CollectorInterface;
 		public dispatch = sandbox.stub();
 		public maxTimeout = 30000;
