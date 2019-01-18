@@ -1,4 +1,3 @@
-/* eslint-env node */
 /* eslint-disable no-process-env */
 'use strict';
 
