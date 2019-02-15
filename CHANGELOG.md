@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/BBVAEngineering/ember-collector-dispatcher/compare/v1.0.3...v1.0.4) (2019-02-15)
+
+
+### Bug Fixes
+
+* **dispatcher:** continue dispatching when is empty ([673c967](https://github.com/BBVAEngineering/ember-collector-dispatcher/commit/673c967))
+
 ## [1.0.3](https://github.com/BBVAEngineering/ember-collector-dispatcher/compare/v1.0.2...v1.0.3) (2019-01-18)
 
 
