@@ -202,5 +202,28 @@ module('Unit | Service | dispatcher', (hooks) => {
 		assert.ok((collector.shift as SinonStub).calledWith(2));
 		assert.ok((dispatcher.dispatch as SinonSpy).calledWith([3]));
 	});
+
+	test('it dispatches items inserted after being empty', async(assert) => {
+		dispatcher.maxTimeout = 30000;
+		dispatcher.maxConcurrent = 50;
+
+		collector.shift = sandbox.stub();
+		dispatcher.dispatch = sandbox.stub().resolves([]);
+
+		(collector.shift as SinonStub).onCall(0).resolves([]);
+		(collector.shift as SinonStub).onCall(1).resolves([1, 2]);
+
+		await dispatcher.start();
+
+		sandbox.clock.tick(30000);
+
+		await waitUntil(() => !dispatcher.isDispatching);
+
+		sandbox.clock.tick(30000);
+
+		await waitUntil(() => !dispatcher.isDispatching);
+
+		assert.ok((dispatcher.dispatch as SinonSpy).calledOnceWith([1, 2]));
+	});
 });
 

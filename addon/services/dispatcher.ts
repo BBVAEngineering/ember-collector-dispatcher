@@ -47,11 +47,11 @@ export default abstract class Dispatcher extends Service implements DispatcherIn
 					if (itemsReturned && itemsReturned.length > 0) {
 						await collector.unshift(...itemsReturned);
 					}
-
-					this.waitAndSendMessage();
 				}
 
 				this.isDispatching = false;
+
+				this.waitAndSendMessage();
 			}
 		}, this.maxTimeout);
 	}
