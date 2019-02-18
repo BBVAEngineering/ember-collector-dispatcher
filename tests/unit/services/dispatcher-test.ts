@@ -3,10 +3,9 @@ import { setupTest } from 'ember-qunit';
 import sinon, { SinonStub, SinonSpy } from 'sinon';
 import { CollectorInterface } from 'ember-collector-dispatcher/services/collector';
 import Dispatcher, { DispatcherInterface } from 'ember-collector-dispatcher/services/dispatcher';
-import Service from '@ember/service';
+import Service, { inject as service } from '@ember/service';
 import { TestContext } from 'ember-test-helpers';
 import { MAX_TIMEOUT, MAX_CONCURRENT } from 'ember-collector-dispatcher/constants';
-import { inject } from '@ember-decorators/service';
 import waitUntil from '@ember/test-helpers/wait-until';
 
 declare module '@ember/service' {
@@ -35,14 +34,17 @@ module('Unit | Service | dispatcher', (hooks) => {
 		}
 	}
 
-	class DummyDispatcher extends Dispatcher {
-		@inject('dummy-collector')
+	class BasicDispatcher extends Dispatcher {
 		public collector!: CollectorInterface;
 
 		async dispatch(items: any[]) {
 			return items;
 		}
 	}
+
+	class DummyDispatcher extends BasicDispatcher.extend({
+		collector: service('dummy-collector')
+	}) {}
 
 	setupTest(hooks);
 
