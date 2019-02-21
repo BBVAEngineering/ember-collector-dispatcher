@@ -81,7 +81,6 @@
     "ember-cli-htmlbars": "^3.0.0",
     "ember-cli-template-lint": "^1.0.0-beta.2",
     "ember-cli-typescript": "^1.5.0",
-    "ember-cli-update": "^0.29.5",
     "ember-disable-prototype-extensions": "^1.1.2",
     "ember-load-initializers": "^2.0.0",
     "ember-maybe-import-regenerator": "^0.1.6",
