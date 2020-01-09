@@ -99,7 +99,7 @@
     "istanbul": "^0.4.5",
     "json": "^9.0.6",
     "loader.js": "^4.2.3",
-    "semantic-release": "^15.13.3",
+    "semantic-release": "^16.0.0",
     "travis-deploy-once": "^5.0.11",
     "typescript": "^3.3.3",
     "typescript-eslint-parser": "^22.0.0"
