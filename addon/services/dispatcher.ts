@@ -33,7 +33,7 @@ export default abstract class Dispatcher extends Service implements DispatcherIn
 
 	private waitAndSendMessage() {
 		setTimeout(async() => {
-			if (this.isRunning) {
+			if (this.isRunning && !(this.isDestroying || this.isDestroyed)) {
 				const collector = this.get('collector'); // getter for lts versions
 
 				this.isDispatching = true;
