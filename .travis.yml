@@ -1,15 +1,13 @@
 ---
 language: node_js
-node_js: stable
+node_js: lts/erbium
 sudo: false
 dist: trusty
 
 addons:
   chrome: stable
 
-cache:
-  directories:
-    - $HOME/.npm
+cache: yarn
 
 env:
   global:
@@ -24,46 +22,37 @@ jobs:
     - stage: "Tests"
       before_install:
         - npm config set spin false
-        - npm install -g npm@6
         - npm install -g codecov
-        - npm install -g greenkeeper-lockfile@1
         - npm install -g @commitlint/travis-cli
-        - npm --version
-      install:
-        - if [[ $TRAVIS_BRANCH =~ greenkeeper || $TRAVIS_PULL_REQUEST_BRANCH =~ greenkeeper ]]; then npm install; else npm ci; fi
-      before_script:
-        - greenkeeper-lockfile-update
+        - yarn --version
       script:
         - commitlint-travis
-        - npm run lint:js
-        - npm run lint:hbs
-        - npm test
-      after_script:
-        - greenkeeper-lockfile-upload
+        - yarn lint:js
+        - yarn lint:hbs
+        - yarn test
       after_success:
         - codecov --file=coverage/lcov.info
 
     - stage: "Regression Tests"
-      env: EMBER_TRY_SCENARIO=ember-lts-3.4
+      env: EMBER_TRY_SCENARIO=ember-lts-3.12
+    - env: EMBER_TRY_SCENARIO=ember-lts-3.16
     - env: EMBER_TRY_SCENARIO=ember-release
     - env: EMBER_TRY_SCENARIO=ember-beta
     - env: EMBER_TRY_SCENARIO=ember-canary
     - env: EMBER_TRY_SCENARIO=ember-default-with-jquery
+    - env: EMBER_TRY_SCENARIO=ember-classic
 
     - stage: "Release"
       script: skip
       deploy:
         provider: script
         skip_cleanup: true
-        before_script:
-          - npm uninstall husky
         script:
           - npx semantic-release
 
 before_install:
   - npm config set spin false
-  - npm install -g npm@6
-  - npm --version
+  - yarn --version
 
 script:
   - node_modules/.bin/ember try:one $EMBER_TRY_SCENARIO
