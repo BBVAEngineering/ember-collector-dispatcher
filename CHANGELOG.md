@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/BBVAEngineering/ember-collector-dispatcher/compare/v1.0.4...v1.0.5) (2020-08-26)
+
+
+### Bug Fixes
+
+* **dispatcher:** prevent timeout running on destroyed apps ([162a5f2](https://github.com/BBVAEngineering/ember-collector-dispatcher/commit/162a5f239219553cc5ea3cc1d8b80441da0bb31a))
+
 ## [1.0.4](https://github.com/BBVAEngineering/ember-collector-dispatcher/compare/v1.0.3...v1.0.4) (2019-02-15)
 
 
