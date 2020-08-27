@@ -1,3 +1,10 @@
+## [1.0.6](https://github.com/BBVAEngineering/ember-collector-dispatcher/compare/v1.0.5...v1.0.6) (2020-08-27)
+
+
+### Bug Fixes
+
+* ignore ts lint ([087aa37](https://github.com/BBVAEngineering/ember-collector-dispatcher/commit/087aa374032b13e92cae53d0fac851aec69f3ff4))
+
 ## [1.0.5](https://github.com/BBVAEngineering/ember-collector-dispatcher/compare/v1.0.4...v1.0.5) (2020-08-26)
 
 
