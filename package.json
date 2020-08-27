@@ -34,6 +34,8 @@
     "start": "ember server",
     "test": "COVERAGE=true ember test",
     "posttest": "npm run report-coverage && npm run check-coverage && npm run validate-coverage",
+    "lint": "npm run lint:js && npm run lint:hbs && npm run lint:types",
+    "lint:types": "tsc",
     "lint:hbs": "ember-template-lint .",
     "lint:js": "eslint --ext .js,.ts --max-warnings 0 ./*.js addon app config tests",
     "report-coverage": "istanbul report --include=coverage/coverage-final.json text",
