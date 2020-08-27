@@ -18,7 +18,9 @@ export default abstract class Dispatcher extends Service implements DispatcherIn
 	public isRunning = false;
 	public isDispatching = false;
 	public abstract dispatch(items: any[]): Promise<any[]>;
+	// @ts-ignore
 	public maxTimeout: number = this.maxTimeout || MAX_TIMEOUT;
+	// @ts-ignore
 	public maxConcurrent: number = this.maxConcurrent || MAX_CONCURRENT;
 
 	async start() {

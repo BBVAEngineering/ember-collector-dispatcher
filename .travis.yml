@@ -27,8 +27,7 @@ jobs:
         - yarn --version
       script:
         - commitlint-travis
-        - yarn lint:js
-        - yarn lint:hbs
+        - yarn lint
         - yarn test
       after_success:
         - codecov --file=coverage/lcov.info
