@@ -93,7 +93,7 @@ module('Unit | Service | dispatcher', (hooks) => {
 		assert.notOk(dispatcher.isRunning, 'dispatcher is running');
 	});
 
-	test('it dispatches on timeout when has items', async(assert) => {
+	test('it dispatches on idle before max timeout when has items', async(assert) => {
 		const items = [1, 2, 3];
 
 		dispatcher.maxTimeout = 30000;
@@ -106,11 +106,7 @@ module('Unit | Service | dispatcher', (hooks) => {
 
 		assert.notOk(dispatcher.isDispatching, 'dispatcher is not dispatching');
 
-		sandbox.clock.tick(15000);
-
-		assert.notOk(dispatcher.isDispatching, 'dispatcher is not dispatching');
-
-		sandbox.clock.tick(15000);
+		sandbox.clock.tick(30000);
 
 		assert.ok(dispatcher.isDispatching, 'dispatcher is dispatching');
 
