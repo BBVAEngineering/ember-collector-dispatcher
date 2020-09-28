@@ -151,5 +151,14 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 
 		assert.deepEqual(item, [{ foo: 'bar' }, { bar: 'foo' }], 'item is expected');
 	});
+
+	test('it pushes items and unshifts once', async(assert) => {
+		await storage.push({ foo: 'bar' }, { bar: 'foo' });
+		await storage.unshift({ zzz: 'zzz' });
+
+		const count = await table.count();
+
+		assert.equal(count, 3, 'items exist');
+	});
 });
 

@@ -140,6 +140,19 @@ module('Unit | Service | collector', (hooks) => {
 		assert.ok(count.calledOnce, 'adapter method count is called');
 	});
 
+	test('it calls push method with previous setup on adapter', async(assert) => {
+		isSupported.resolves(true);
+		push.resolves();
+
+		const service = Factory.create({ adapters: ['stub'] });
+
+		await service.setup();
+		await service.push(1);
+
+		assert.ok(isSupported.calledOnce, 'adapter method isSupported is called');
+		assert.ok(push.calledOnceWith(1), 'adapter method push is called');
+	});
+
 	test('it calls push method on adapter', async(assert) => {
 		isSupported.resolves(true);
 		push.resolves();

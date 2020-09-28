@@ -6,6 +6,8 @@ export default class Dispatcher extends Service {
 	isDispatching = false;
 	maxTimeout = this.maxTimeout || MAX_TIMEOUT;
 	maxConcurrent = this.maxConcurrent || MAX_CONCURRENT;
+	/* istanbul ignore next */
+	schedulingCallback = window.requestIdleCallback || window.requestAnimationFrame;
 
 	async start() {
 		this.isRunning = true;
@@ -17,9 +19,7 @@ export default class Dispatcher extends Service {
 	}
 
 	waitAndSendMessage() {
-		const callback = window.requestIdleCallback || window.requestAnimationFrame;
-
-		callback(async() => {
+		this.schedulingCallback(async() => {
 			if (this.isRunning && !(this.isDestroying || this.isDestroyed)) {
 				this.isDispatching = true;
 
