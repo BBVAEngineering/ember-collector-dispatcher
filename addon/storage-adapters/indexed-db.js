@@ -1,4 +1,3 @@
-import { StorageAdapterInterface } from './storage-adapter';
 import EmberObject from '@ember/object';
 import { isPresent } from '@ember/utils';
 import Dexie from 'dexie';
@@ -10,8 +9,8 @@ export const schema = {
 };
 
 export default class IndexedDb extends EmberObject {
-	constructor() {
-		super(...arguments);
+	init() {
+		super.init(...arguments);
 
 		if (!this.database) {
 			throw new Error('IndexedDB storage adapter needs a database');
@@ -45,6 +44,7 @@ export default class IndexedDb extends EmberObject {
 
 		if (!length) {
 			this.table.bulkAdd(items);
+
 			return;
 		}
 

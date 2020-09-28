@@ -1,10 +1,8 @@
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
-import sinon, { SinonStub, SinonSpy } from 'sinon';
-import { CollectorInterface } from 'ember-collector-dispatcher/services/collector';
-import Dispatcher, { DispatcherInterface } from 'ember-collector-dispatcher/services/dispatcher';
+import sinon from 'sinon';
+import Dispatcher from 'ember-collector-dispatcher/services/dispatcher';
 import Service, { inject as service } from '@ember/service';
-import { TestContext } from 'ember-test-helpers';
 import { MAX_TIMEOUT, MAX_CONCURRENT } from 'ember-collector-dispatcher/constants';
 import waitUntil from '@ember/test-helpers/wait-until';
 

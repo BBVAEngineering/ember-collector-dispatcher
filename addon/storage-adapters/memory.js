@@ -1,9 +1,8 @@
-import { StorageAdapterInterface } from './storage-adapter';
 import EmberObject from '@ember/object';
 
 export default class Memory extends EmberObject {
-	constructor() {
-		super(...arguments);
+	init() {
+		super.init(...arguments);
 
 		this.memory = [];
 	}

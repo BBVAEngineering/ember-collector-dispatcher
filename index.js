@@ -56,6 +56,7 @@ module.exports = {
 			this.import = function importShim(asset, options) {
 				const app = this._findHost();
 
+				// eslint-disable-next-line no-unsanitized/method
 				app.import(asset, options);
 			};
 		}

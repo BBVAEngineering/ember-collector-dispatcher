@@ -1,5 +1,4 @@
 import Service from '@ember/service';
-import { StorageAdapterInterface } from '../storage-adapters/storage-adapter';
 import { getOwner } from '@ember/application';
 
 export default class Collector extends Service {

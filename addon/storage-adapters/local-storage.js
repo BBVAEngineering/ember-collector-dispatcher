@@ -1,9 +1,8 @@
-import { StorageAdapterInterface } from './storage-adapter';
 import EmberObject from '@ember/object';
 
 export default class LocalStorage extends EmberObject {
-	constructor() {
-		super(...arguments);
+	init() {
+		super.init(...arguments);
 
 		if (!this.key) {
 			throw new Error('LocalStorage storage adapter needs a key');

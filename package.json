@@ -35,7 +35,6 @@
     "start": "ember server",
     "test": "npm-run-all lint:* test:*",
     "test:ember": "COVERAGE=true ember test",
-    "test:ember-compatibility": "ember try:each",
     "posttest": "npm run report-coverage && npm run check-coverage && npm run validate-coverage",
     "lint": "npm-run-all --aggregate-output --continue-on-error --parallel lint:*",
     "lint:hbs": "ember-template-lint .",
@@ -96,8 +95,7 @@
     "json": "^10.0.0",
     "loader.js": "^4.2.3",
     "npm-run-all": "^4.1.5",
-    "semantic-release": "^17.1.2",
-    "travis-deploy-once": "^5.0.11"
+    "semantic-release": "^17.1.2"
   },
   "engines": {
     "node": "10.* || >= 12"

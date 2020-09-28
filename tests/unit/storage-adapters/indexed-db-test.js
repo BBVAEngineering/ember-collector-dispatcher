@@ -1,7 +1,6 @@
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
-import { TestContext } from 'ember-test-helpers';
-import { IndexedDbInterface, schema, version, tableName } from 'ember-collector-dispatcher/storage-adapters/indexed-db';
+import { schema, version, tableName } from 'ember-collector-dispatcher/storage-adapters/indexed-db';
 import Dexie from 'dexie';
 
 async function setupIndexedDb(dbName) {
@@ -53,6 +52,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 
 		assert.notOk(await storage.isSupported(), 'storage is not supported');
 
+		// eslint-disable-next-line require-atomic-updates
 		Dexie.dependencies.indexedDB = indexedDB;
 	});
 

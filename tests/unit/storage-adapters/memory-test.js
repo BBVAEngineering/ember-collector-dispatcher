@@ -1,7 +1,5 @@
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
-import { TestContext } from 'ember-test-helpers';
-import { MemoryInterface } from 'ember-collector-dispatcher/storage-adapters/memory';
 
 module('Unit | StorageAdapter | memory', (hooks) => {
 	let storage;

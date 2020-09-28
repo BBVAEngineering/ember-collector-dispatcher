@@ -1,9 +1,7 @@
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
-import { StorageAdapterInterface } from 'ember-collector-dispatcher/storage-adapters/storage-adapter';
 import EmberObject from '@ember/object';
-import { TestContext } from 'ember-test-helpers';
-import Collector, { CollectorInterface } from 'ember-collector-dispatcher/services/collector';
+import Collector from 'ember-collector-dispatcher/services/collector';
 import sinon from 'sinon';
 import { begin, end } from '@ember/runloop';
 
