@@ -2,21 +2,10 @@
 
 const getChannelURL = require('ember-source-channel-url');
 
-module.exports = function() {
-	return Promise.all([
-		getChannelURL('release'),
-		getChannelURL('beta'),
-		getChannelURL('canary')
-	]).then((urls) => ({
+module.exports = async function() {
+	return {
+		useYarn: true,
 		scenarios: [
-			{
-				name: 'ember-lts-3.12',
-				npm: {
-					devDependencies: {
-						'ember-source': '~3.12.0'
-					}
-				}
-			},
 			{
 				name: 'ember-lts-3.16',
 				npm: {
@@ -26,10 +15,18 @@ module.exports = function() {
 				}
 			},
 			{
+				name: 'ember-lts-3.20',
+				npm: {
+					devDependencies: {
+						'ember-source': '~3.20.5'
+					}
+				}
+			},
+			{
 				name: 'ember-release',
 				npm: {
 					devDependencies: {
-						'ember-source': urls[0]
+						'ember-source': await getChannelURL('release')
 					}
 				}
 			},
@@ -37,7 +34,7 @@ module.exports = function() {
 				name: 'ember-beta',
 				npm: {
 					devDependencies: {
-						'ember-source': urls[1]
+						'ember-source': await getChannelURL('beta')
 					}
 				}
 			},
@@ -45,7 +42,7 @@ module.exports = function() {
 				name: 'ember-canary',
 				npm: {
 					devDependencies: {
-						'ember-source': urls[2]
+						'ember-source': await getChannelURL('canary')
 					}
 				}
 			},
@@ -58,7 +55,7 @@ module.exports = function() {
 				},
 				npm: {
 					devDependencies: {
-						'@ember/jquery': '^0.5.1'
+						'@ember/jquery': '^1.1.0'
 					}
 				}
 			},
@@ -78,5 +75,5 @@ module.exports = function() {
 				}
 			}
 		]
-	}));
+	};
 };

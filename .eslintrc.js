@@ -2,16 +2,20 @@
 
 module.exports = {
 	root: true,
-	parser: 'typescript-eslint-parser',
+	parser: 'babel-eslint',
 	parserOptions: {
-		ecmaVersion: 2017,
-		sourceType: 'module'
+		ecmaVersion: 2018,
+		sourceType: 'module',
+		ecmaFeatures: {
+			legacyDecorators: true
+		}
 	},
 	plugins: [
 		'ember',
-		'typescript'
+		'bbva'
 	],
 	extends: [
+		'eslint:recommended',
 		'plugin:ember/recommended',
 		'eslint-config-bbva'
 	],
@@ -19,7 +23,7 @@ module.exports = {
 		browser: true
 	},
 	rules: {
-		'no-unused-vars': 0
+		'ember/no-jquery': 'error'
 	},
 	overrides: [{
 		files: [
@@ -41,16 +45,16 @@ module.exports = {
 			'tests/dummy/app/**'
 		],
 		parserOptions: {
-			sourceType: 'script',
-			ecmaVersion: 2015
+			sourceType: 'script'
 		},
 		env: {
 			browser: false,
 			node: true
 		},
 		plugins: ['node'],
-		rules: Object.assign({}, require('eslint-plugin-node').configs.recommended.rules, {
+		extends: ['plugin:node/recommended'],
+		rules: {
 			'no-process-env': 0
-		})
+		}
 	}]
 };

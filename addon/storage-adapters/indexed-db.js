@@ -1,4 +1,3 @@
-import { StorageAdapterInterface } from './storage-adapter';
 import EmberObject from '@ember/object';
 import { isPresent } from '@ember/utils';
 import Dexie from 'dexie';
@@ -9,17 +8,9 @@ export const schema = {
 	[tableName]: '++_id'
 };
 
-export interface IndexedDbInterface extends StorageAdapterInterface {
-	database: string;
-}
-
-export default class IndexedDb extends EmberObject implements IndexedDbInterface {
-	public database!: string;
-	private db!: Dexie;
-	private table!: Dexie.Table<any, number>;
-
+export default class IndexedDb extends EmberObject {
 	init() {
-		this._super(...arguments);
+		super.init(...arguments);
 
 		if (!this.database) {
 			throw new Error('IndexedDB storage adapter needs a database');
@@ -40,19 +31,20 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 		return this.db.open().then(() => true, () => false);
 	}
 
-	count(this: IndexedDb) {
+	count() {
 		return this.table.count();
 	}
 
-	async push(this: IndexedDb, ...items: any[]) {
+	async push(...items) {
 		this.table.bulkAdd(items);
 	}
 
-	async unshift(this: IndexedDb, ...items: any[]) {
+	async unshift(...items) {
 		const length = await this.count();
 
 		if (!length) {
 			this.table.bulkAdd(items);
+
 			return;
 		}
 
@@ -67,7 +59,7 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 		this.table.bulkAdd(items);
 	}
 
-	private async removeItem(this: IndexedDb, pop?: boolean) {
+	async removeItem(pop) {
 		const collection = await this.table.toCollection();
 		const currentItem = pop ? await collection.last() : await collection.first();
 
@@ -81,8 +73,8 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 		return [];
 	}
 
-	async pop(this: IndexedDb, count: number = 1) {
-		let result: any[] = [];
+	async pop(count = 1) {
+		let result = [];
 
 		await this.db.transaction('rw', this.table, async() => {
 			for (let i = 0; i < count; i++) {
@@ -95,8 +87,8 @@ export default class IndexedDb extends EmberObject implements IndexedDbInterface
 		return result;
 	}
 
-	async shift(this: IndexedDb, count: number = 1) {
-		let result: any[] = [];
+	async shift(count = 1) {
+		let result = [];
 
 		await this.db.transaction('rw', this.table, async() => {
 			for (let i = 0; i < count; i++) {

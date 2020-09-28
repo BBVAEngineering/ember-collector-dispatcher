@@ -1,0 +1,164 @@
+import { module, test } from 'qunit';
+import { setupTest } from 'ember-qunit';
+import { schema, version, tableName } from 'ember-collector-dispatcher/storage-adapters/indexed-db';
+import Dexie from 'dexie';
+
+async function setupIndexedDb(dbName) {
+	const db = new Dexie(dbName);
+
+	db.version(version).stores(schema);
+
+	const table = db.table(tableName);
+
+	return table;
+}
+
+module('Unit | StorageAdapter | indexed-db', (hooks) => {
+	const dbName = 'database';
+	let storage, table;
+
+	setupTest(hooks);
+
+	hooks.beforeEach(async function() {
+		const factory = this.owner.factoryFor('storage-adapter:indexed-db');
+
+		storage = factory.create({ database: dbName });
+
+		table = await setupIndexedDb(dbName);
+	});
+
+	hooks.afterEach(async() => {
+		if (table.schema) {
+			await table.clear();
+		}
+	});
+
+	test('it exists', (assert) => {
+		assert.ok(storage, 'service exists');
+	});
+
+	test('it is supported', async(assert) => {
+		assert.ok(await storage.isSupported(), 'storage is supported');
+	});
+
+	test('it checks when is not supported', async function(assert) {
+		const indexedDB = Dexie.dependencies.indexedDB;
+
+		Dexie.dependencies.indexedDB = null;
+
+		const factory = this.owner.factoryFor('storage-adapter:indexed-db');
+
+		storage = factory.create({ database: dbName });
+
+		assert.notOk(await storage.isSupported(), 'storage is not supported');
+
+		// eslint-disable-next-line require-atomic-updates
+		Dexie.dependencies.indexedDB = indexedDB;
+	});
+
+	test('it throws an error when database is not defined', async function(assert) {
+		const factory = this.owner.factoryFor('storage-adapter:indexed-db');
+
+		assert.throws(() => {
+			factory.create({ database: null });
+		});
+	});
+
+	test('it returns count of items', async(assert) => {
+		await table.bulkAdd([{ _id: 1 }, { _id: 2 }]);
+
+		const count = await storage.count();
+
+		assert.equal(count, 2, 'count is expected');
+	});
+
+	test('it pushes an item', async(assert) => {
+		await storage.push({ foo: 'bar' });
+
+		const count = await table.count();
+
+		assert.equal(count, 1, 'item exists');
+	});
+
+	test('it pushes several items', async(assert) => {
+		await storage.push({ foo: 'bar' }, { bar: 'foo' });
+
+		const count = await table.count();
+
+		assert.equal(count, 2, 'items exist');
+	});
+
+	test('it unshifts an item', async(assert) => {
+		await storage.unshift({ foo: 'bar' });
+
+		const count = await table.count();
+
+		assert.equal(count, 1, 'item exists');
+	});
+
+	test('it unshifts several items', async(assert) => {
+		await storage.unshift({ foo: 'bar' }, { bar: 'foo' });
+
+		const count = await table.count();
+
+		assert.equal(count, 2, 'items exist');
+	});
+
+	test('it pushes an item and pops once', async(assert) => {
+		await storage.push({ foo: 'bar' });
+
+		const item = await storage.pop();
+
+		assert.deepEqual(item, [{ foo: 'bar' }], 'item is expected');
+	});
+
+	test('it pushes items and pops once', async(assert) => {
+		await storage.push({ foo: 'bar' }, { bar: 'foo' });
+
+		const item = await storage.pop();
+
+		assert.deepEqual(item, [{ bar: 'foo' }], 'item is expected');
+	});
+
+	test('it pushes items and pops several times', async(assert) => {
+		await storage.push({ foo: 'bar' }, { bar: 'foo' });
+
+		const item = await storage.pop(2);
+
+		assert.deepEqual(item, [{ bar: 'foo' }, { foo: 'bar' }], 'item is expected');
+	});
+
+	test('it pushes an item and shifts once', async(assert) => {
+		await storage.push({ foo: 'bar' });
+
+		const item = await storage.shift();
+
+		assert.deepEqual(item, [{ foo: 'bar' }], 'item is expected');
+	});
+
+	test('it pushes items and shifts once', async(assert) => {
+		await storage.push({ foo: 'bar' }, { bar: 'foo' });
+
+		const item = await storage.shift();
+
+		assert.deepEqual(item, [{ foo: 'bar' }], 'item is expected');
+	});
+
+	test('it pushes items and shifts several times', async(assert) => {
+		await storage.push({ foo: 'bar' }, { bar: 'foo' });
+
+		const item = await storage.shift(2);
+
+		assert.deepEqual(item, [{ foo: 'bar' }, { bar: 'foo' }], 'item is expected');
+	});
+
+	test('it pushes items and unshifts once', async(assert) => {
+		await storage.push({ foo: 'bar' }, { bar: 'foo' });
+		await storage.unshift({ zzz: 'zzz' });
+
+		const count = await table.count();
+
+		assert.equal(count, 3, 'items exist');
+	});
+});
+

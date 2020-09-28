@@ -1,18 +1,12 @@
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
-import { StorageAdapterInterface } from 'ember-collector-dispatcher/storage-adapters/storage-adapter';
 import EmberObject from '@ember/object';
-import { TestContext } from 'ember-test-helpers';
-import Collector, { CollectorInterface } from 'ember-collector-dispatcher/services/collector';
+import Collector from 'ember-collector-dispatcher/services/collector';
 import sinon from 'sinon';
 import { begin, end } from '@ember/runloop';
 
-interface EmberFactory<T> {
-	create(...args: any[]): T
-}
-
 module('Unit | Service | collector', (hooks) => {
-	let Factory: EmberFactory<CollectorInterface>;
+	let Factory;
 	const sandbox = sinon.createSandbox();
 	const isSupported = sandbox.stub();
 	const count = sandbox.stub();
@@ -23,8 +17,7 @@ module('Unit | Service | collector', (hooks) => {
 
 	setupTest(hooks);
 
-	class DummyStorageAdapter extends EmberObject implements StorageAdapterInterface {
-		private supported!: boolean;
+	class DummyStorageAdapter extends EmberObject {
 		async isSupported() {
 			return this.supported;
 		}
@@ -41,7 +34,7 @@ module('Unit | Service | collector', (hooks) => {
 		}
 	}
 
-	class StubStorageAdapter extends EmberObject implements StorageAdapterInterface {
+	class StubStorageAdapter extends EmberObject {
 		isSupported = isSupported;
 		count = count;
 		push = push;
@@ -50,11 +43,11 @@ module('Unit | Service | collector', (hooks) => {
 		shift = shift;
 	}
 
-	class DummyCollector extends Collector implements CollectorInterface {
-		adapters: any[] = this.adapters || []
+	class DummyCollector extends Collector {
+		adapters = this.adapters || []
 	}
 
-	hooks.beforeEach(function(this: TestContext) {
+	hooks.beforeEach(function() {
 		this.owner.register('storage-adapter:dummy', DummyStorageAdapter);
 		this.owner.register('storage-adapter:stub', StubStorageAdapter);
 
@@ -72,7 +65,7 @@ module('Unit | Service | collector', (hooks) => {
 	});
 
 	test('default values can be predefined', (assert) => {
-		const adapters: any[] = [];
+		const adapters = [];
 		const klass = DummyCollector.extend({
 			adapters
 		});
@@ -145,6 +138,19 @@ module('Unit | Service | collector', (hooks) => {
 
 		assert.ok(isSupported.calledOnce, 'adapter method isSupported is called');
 		assert.ok(count.calledOnce, 'adapter method count is called');
+	});
+
+	test('it calls push method with previous setup on adapter', async(assert) => {
+		isSupported.resolves(true);
+		push.resolves();
+
+		const service = Factory.create({ adapters: ['stub'] });
+
+		await service.setup();
+		await service.push(1);
+
+		assert.ok(isSupported.calledOnce, 'adapter method isSupported is called');
+		assert.ok(push.calledOnceWith(1), 'adapter method push is called');
 	});
 
 	test('it calls push method on adapter', async(assert) => {
