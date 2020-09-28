@@ -1,46 +1,15 @@
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
-import { TestContext } from 'ember-test-helpers';
-import { LocalStorageInterface } from 'ember-collector-dispatcher/storage-adapters/local-storage';
 
-module('Unit | StorageAdapter | local-storage', (hooks) => {
-	const dbName = 'database';
-	let storage: LocalStorageInterface;
-
-	function setItems(items: any[]) {
-		const str = JSON.stringify(items);
-
-		window.localStorage.setItem(dbName, str);
-	}
-
-	function getItems() {
-		const str = window.localStorage.getItem(dbName);
-
-		if (!str) {
-			return [];
-		}
-
-		return JSON.parse(str);
-	}
-
-	function countItems() {
-		const items = getItems();
-
-		return items.length;
-	}
+module('Unit | StorageAdapter | memory', (hooks) => {
+	let storage;
 
 	setupTest(hooks);
 
-	hooks.beforeEach(function(this: TestContext) {
-		const factory = this.owner.factoryFor('storage-adapter:local-storage');
+	hooks.beforeEach(function() {
+		const factory = this.owner.factoryFor('storage-adapter:memory');
 
-		storage = factory.create({ key: dbName });
-	});
-
-	hooks.afterEach(() => {
-		if (window.localStorage) {
-			window.localStorage.clear();
-		}
+		storage = factory.create();
 	});
 
 	test('it exists', (assert) => {
@@ -51,40 +20,10 @@ module('Unit | StorageAdapter | local-storage', (hooks) => {
 		assert.ok(storage.isSupported(), 'storage is supported');
 	});
 
-	test('it checks when is not supported', async function(this: TestContext, assert) {
-		const localStorage = window.localStorage;
-
-		Object.defineProperty(window, 'localStorage', { value: undefined });
-
-		const factory = this.owner.factoryFor('storage-adapter:local-storage');
-
-		storage = factory.create({ key: dbName });
-
-		assert.notOk(await storage.isSupported(), 'storage is not supported');
-
-		Object.defineProperty(window, 'localStorage', { value: localStorage });
-	});
-
-	test('it throws an error when key is not defined', async function(this: TestContext, assert) {
-		const factory = this.owner.factoryFor('storage-adapter:local-storage');
-
-		assert.throws(() => {
-			factory.create({ key: null });
-		});
-	});
-
-	test('it returns count of items', async(assert) => {
-		setItems([{ _id: 1 }, { _id: 2 }]);
-
-		const count = await storage.count();
-
-		assert.equal(count, 2, 'count is expected');
-	});
-
 	test('it pushes an item', async(assert) => {
 		await storage.push({ foo: 'bar' });
 
-		const count = countItems();
+		const count = await storage.count();
 
 		assert.equal(count, 1, 'item exists');
 	});
@@ -92,7 +31,7 @@ module('Unit | StorageAdapter | local-storage', (hooks) => {
 	test('it pushes several items', async(assert) => {
 		await storage.push({ foo: 'bar' }, { bar: 'foo' });
 
-		const count = countItems();
+		const count = await storage.count();
 
 		assert.equal(count, 2, 'items exist');
 	});
@@ -100,7 +39,7 @@ module('Unit | StorageAdapter | local-storage', (hooks) => {
 	test('it unshifts an item', async(assert) => {
 		await storage.unshift({ foo: 'bar' });
 
-		const count = countItems();
+		const count = await storage.count();
 
 		assert.equal(count, 1, 'item exists');
 	});
@@ -108,7 +47,7 @@ module('Unit | StorageAdapter | local-storage', (hooks) => {
 	test('it unshifts several items', async(assert) => {
 		await storage.unshift({ foo: 'bar' }, { bar: 'foo' });
 
-		const count = countItems();
+		const count = await storage.count();
 
 		assert.equal(count, 2, 'items exist');
 	});

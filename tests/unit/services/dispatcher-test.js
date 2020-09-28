@@ -1,25 +1,15 @@
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
-import sinon, { SinonStub, SinonSpy } from 'sinon';
-import { CollectorInterface } from 'ember-collector-dispatcher/services/collector';
-import Dispatcher, { DispatcherInterface } from 'ember-collector-dispatcher/services/dispatcher';
+import sinon from 'sinon';
+import Dispatcher from 'ember-collector-dispatcher/services/dispatcher';
 import Service, { inject as service } from '@ember/service';
-import { TestContext } from 'ember-test-helpers';
 import { MAX_TIMEOUT, MAX_CONCURRENT } from 'ember-collector-dispatcher/constants';
 import waitUntil from '@ember/test-helpers/wait-until';
 
-declare module '@ember/service' {
-	interface Registry {
-		'dummy-collector': CollectorInterface;
-	}
-}
-
 module('Unit | Service | dispatcher', (hooks) => {
-	let sandbox: sinon.SinonSandbox;
-	let collector: CollectorInterface;
-	let dispatcher: DispatcherInterface;
+	let sandbox, collector, dispatcher;
 
-	class DummyCollector extends Service implements CollectorInterface {
+	class DummyCollector extends Service {
 		adapters = [];
 		async count() {
 			return 0;
@@ -35,9 +25,7 @@ module('Unit | Service | dispatcher', (hooks) => {
 	}
 
 	class BasicDispatcher extends Dispatcher {
-		public collector!: CollectorInterface;
-
-		async dispatch(items: any[]) {
+		async dispatch(items) {
 			return items;
 		}
 	}
@@ -48,7 +36,7 @@ module('Unit | Service | dispatcher', (hooks) => {
 
 	setupTest(hooks);
 
-	hooks.beforeEach(async function(this: TestContext) {
+	hooks.beforeEach(async function() {
 		sandbox = sinon.createSandbox({ useFakeTimers: true });
 
 		this.owner.register('service:dummy-collector', DummyCollector);
@@ -113,8 +101,8 @@ module('Unit | Service | dispatcher', (hooks) => {
 		await waitUntil(() => !dispatcher.isDispatching);
 
 		assert.notOk(dispatcher.isDispatching, 'dispatcher is not dispatching');
-		assert.ok((collector.shift as SinonStub).calledWith(50));
-		assert.ok((dispatcher.dispatch as SinonStub).calledWith(items));
+		assert.ok(collector.shift.calledWith(50));
+		assert.ok(dispatcher.dispatch.calledWith(items));
 	});
 
 	test('it does not dispatch on timeout when has no items', async(assert) => {
@@ -130,8 +118,8 @@ module('Unit | Service | dispatcher', (hooks) => {
 		await waitUntil(() => !dispatcher.isDispatching);
 
 		assert.notOk(dispatcher.isDispatching, 'dispatcher is not dispatching');
-		assert.ok((collector.shift as SinonStub).calledWith(50));
-		assert.ok((dispatcher.dispatch as SinonSpy).notCalled);
+		assert.ok(collector.shift.calledWith(50));
+		assert.ok(dispatcher.dispatch.notCalled);
 	});
 
 	test('it does not dispatches when is stopped', async(assert) => {
@@ -151,8 +139,8 @@ module('Unit | Service | dispatcher', (hooks) => {
 		await waitUntil(() => !dispatcher.isDispatching);
 
 		assert.notOk(dispatcher.isDispatching, 'dispatcher is not dispatching');
-		assert.ok((collector.shift as SinonStub).notCalled);
-		assert.ok((dispatcher.dispatch as SinonSpy).notCalled);
+		assert.ok(collector.shift.notCalled);
+		assert.ok(dispatcher.dispatch.notCalled);
 	});
 
 	test('it inserts not dispatched items into collector', async(assert) => {
@@ -171,7 +159,7 @@ module('Unit | Service | dispatcher', (hooks) => {
 
 		await waitUntil(() => !dispatcher.isDispatching);
 
-		assert.ok((collector.unshift as SinonSpy).calledWith(1, 2));
+		assert.ok(collector.unshift.calledWith(1, 2));
 	});
 
 	test('it dispatches multiple time when has enough items', async(assert) => {
@@ -181,8 +169,8 @@ module('Unit | Service | dispatcher', (hooks) => {
 		collector.shift = sandbox.stub();
 		dispatcher.dispatch = sandbox.stub().resolves([]);
 
-		(collector.shift as SinonStub).onCall(0).resolves([1, 2]);
-		(collector.shift as SinonStub).onCall(1).resolves([3]);
+		collector.shift.onCall(0).resolves([1, 2]);
+		collector.shift.onCall(1).resolves([3]);
 
 		await dispatcher.start();
 
@@ -190,15 +178,15 @@ module('Unit | Service | dispatcher', (hooks) => {
 
 		await waitUntil(() => !dispatcher.isDispatching);
 
-		assert.ok((collector.shift as SinonStub).calledWith(2));
-		assert.ok((dispatcher.dispatch as SinonSpy).calledWith([1, 2]));
+		assert.ok(collector.shift.calledWith(2));
+		assert.ok(dispatcher.dispatch.calledWith([1, 2]));
 
 		sandbox.clock.tick(30000);
 
 		await waitUntil(() => !dispatcher.isDispatching);
 
-		assert.ok((collector.shift as SinonStub).calledWith(2));
-		assert.ok((dispatcher.dispatch as SinonSpy).calledWith([3]));
+		assert.ok(collector.shift.calledWith(2));
+		assert.ok(dispatcher.dispatch.calledWith([3]));
 	});
 
 	test('it dispatches items inserted after being empty', async(assert) => {
@@ -208,8 +196,8 @@ module('Unit | Service | dispatcher', (hooks) => {
 		collector.shift = sandbox.stub();
 		dispatcher.dispatch = sandbox.stub().resolves([]);
 
-		(collector.shift as SinonStub).onCall(0).resolves([]);
-		(collector.shift as SinonStub).onCall(1).resolves([1, 2]);
+		collector.shift.onCall(0).resolves([]);
+		collector.shift.onCall(1).resolves([1, 2]);
 
 		await dispatcher.start();
 
@@ -221,7 +209,7 @@ module('Unit | Service | dispatcher', (hooks) => {
 
 		await waitUntil(() => !dispatcher.isDispatching);
 
-		assert.ok((dispatcher.dispatch as SinonSpy).calledOnceWith([1, 2]));
+		assert.ok(dispatcher.dispatch.calledOnceWith([1, 2]));
 	});
 });
 

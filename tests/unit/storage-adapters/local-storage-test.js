@@ -1,72 +1,78 @@
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
-import { TestContext } from 'ember-test-helpers';
-import { IndexedDbInterface, schema, version, tableName } from 'ember-collector-dispatcher/storage-adapters/indexed-db';
-import Dexie from 'dexie';
 
-async function setupIndexedDb(dbName: string) {
-	const db = new Dexie(dbName);
-
-	db.version(version).stores(schema);
-
-	const table = db.table(tableName);
-
-	return table;
-}
-
-module('Unit | StorageAdapter | indexed-db', (hooks) => {
+module('Unit | StorageAdapter | local-storage', (hooks) => {
 	const dbName = 'database';
-	let storage: IndexedDbInterface;
-	let table: Dexie.Table<any, number>;
+	let storage;
+
+	function setItems(items) {
+		const str = JSON.stringify(items);
+
+		window.localStorage.setItem(dbName, str);
+	}
+
+	function getItems() {
+		const str = window.localStorage.getItem(dbName);
+
+		if (!str) {
+			return [];
+		}
+
+		return JSON.parse(str);
+	}
+
+	function countItems() {
+		const items = getItems();
+
+		return items.length;
+	}
 
 	setupTest(hooks);
 
-	hooks.beforeEach(async function(this: TestContext) {
-		const factory = this.owner.factoryFor('storage-adapter:indexed-db');
+	hooks.beforeEach(function() {
+		const factory = this.owner.factoryFor('storage-adapter:local-storage');
 
-		storage = factory.create({ database: dbName });
-
-		table = await setupIndexedDb(dbName);
+		storage = factory.create({ key: dbName });
 	});
 
-	hooks.afterEach(async() => {
-		if (table.schema) {
-			await table.clear();
+	hooks.afterEach(() => {
+		if (window.localStorage) {
+			window.localStorage.clear();
 		}
 	});
 
 	test('it exists', (assert) => {
-		assert.ok(storage, 'service exists');
+		assert.ok(storage);
 	});
 
-	test('it is supported', async(assert) => {
-		assert.ok(await storage.isSupported(), 'storage is supported');
+	test('it is supported', (assert) => {
+		assert.ok(storage.isSupported(), 'storage is supported');
 	});
 
-	test('it checks when is not supported', async function(this: TestContext, assert) {
-		const indexedDB = Dexie.dependencies.indexedDB;
+	test('it checks when is not supported', async function(assert) {
+		const localStorage = window.localStorage;
 
-		Dexie.dependencies.indexedDB = (null as unknown) as IDBFactory;
+		Object.defineProperty(window, 'localStorage', { value: undefined });
 
-		const factory = this.owner.factoryFor('storage-adapter:indexed-db');
+		const factory = this.owner.factoryFor('storage-adapter:local-storage');
 
-		storage = factory.create({ database: dbName });
+		storage = factory.create({ key: dbName });
 
 		assert.notOk(await storage.isSupported(), 'storage is not supported');
 
-		Dexie.dependencies.indexedDB = indexedDB;
+		Object.defineProperty(window, 'localStorage', { value: localStorage });
 	});
 
-	test('it throws an error when database is not defined', async function(this: TestContext, assert) {
-		const factory = this.owner.factoryFor('storage-adapter:indexed-db');
+	test('it throws an error when key is not defined', async function(assert) {
+		const factory = this.owner.factoryFor('storage-adapter:local-storage');
 
 		assert.throws(() => {
-			factory.create({ database: null });
+			factory.create({ key: null });
 		});
 	});
 
 	test('it returns count of items', async(assert) => {
-		await table.bulkAdd([{ _id: 1 }, { _id: 2 }]);
+		setItems([{ _id: 1 }, { _id: 2 }]);
 
 		const count = await storage.count();
 
@@ -76,7 +82,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 	test('it pushes an item', async(assert) => {
 		await storage.push({ foo: 'bar' });
 
-		const count = await table.count();
+		const count = countItems();
 
 		assert.equal(count, 1, 'item exists');
 	});
@@ -84,7 +90,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 	test('it pushes several items', async(assert) => {
 		await storage.push({ foo: 'bar' }, { bar: 'foo' });
 
-		const count = await table.count();
+		const count = countItems();
 
 		assert.equal(count, 2, 'items exist');
 	});
@@ -92,7 +98,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 	test('it unshifts an item', async(assert) => {
 		await storage.unshift({ foo: 'bar' });
 
-		const count = await table.count();
+		const count = countItems();
 
 		assert.equal(count, 1, 'item exists');
 	});
@@ -100,7 +106,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 	test('it unshifts several items', async(assert) => {
 		await storage.unshift({ foo: 'bar' }, { bar: 'foo' });
 
-		const count = await table.count();
+		const count = countItems();
 
 		assert.equal(count, 2, 'items exist');
 	});
@@ -126,7 +132,7 @@ module('Unit | StorageAdapter | indexed-db', (hooks) => {
 
 		const item = await storage.pop(2);
 
-		assert.deepEqual(item, [{ bar: 'foo' }, { foo: 'bar' }], 'item is expected');
+		assert.deepEqual(item, [{ foo: 'bar' }, { bar: 'foo' }], 'item is expected');
 	});
 
 	test('it pushes an item and shifts once', async(assert) => {

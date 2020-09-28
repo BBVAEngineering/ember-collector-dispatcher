@@ -1,21 +1,14 @@
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
-import { TestContext } from 'ember-test-helpers';
-import Collector, { CollectorInterface } from 'ember-collector-dispatcher/services/collector';
-import Dispatcher, { DispatcherInterface } from 'ember-collector-dispatcher/services/dispatcher';
-import sinon, { SinonStub } from 'sinon';
+import Collector from 'ember-collector-dispatcher/services/collector';
+import Dispatcher from 'ember-collector-dispatcher/services/dispatcher';
+import sinon from 'sinon';
 import waitUntil from '@ember/test-helpers/wait-until';
 import Dexie from 'dexie';
 import { schema, version, tableName } from 'ember-collector-dispatcher/storage-adapters/indexed-db';
 import { inject as service } from '@ember/service';
 
-declare module '@ember/service' {
-	interface Registry {
-		'main-collector': CollectorInterface;
-	}
-}
-
-async function setupIndexedDb(dbName: string) {
+async function setupIndexedDb(dbName) {
 	const db = new Dexie(dbName);
 
 	db.version(version).stores(schema);
@@ -28,29 +21,26 @@ async function setupIndexedDb(dbName: string) {
 module('Integration | index', (hooks) => {
 	const sandbox = sinon.createSandbox({ useFakeTimers: true });
 	const dbName = 'main';
-	let collector: CollectorInterface;
-	let dispatcher: DispatcherInterface;
-	let table: Dexie.Table<any, number>;
+	let collector, dispatcher, table;
 
 	setupTest(hooks);
 
 	class MainCollector extends Collector {
-		public adapters = [
+		adapters = [
 			['indexed-db', { database: dbName }]
 		];
 	}
 
 	class DummyDispatcher extends Dispatcher {
-		public collector!: CollectorInterface;
-		public dispatch = sandbox.stub();
-		public maxTimeout = 30000;
+		dispatch = sandbox.stub();
+		maxTimeout = 30000;
 	}
 
 	class MainDispatcher extends DummyDispatcher.extend({
 		collector: service('main-collector')
 	}) {}
 
-	hooks.beforeEach(async function(this: TestContext) {
+	hooks.beforeEach(async function() {
 		this.owner.register('service:main-collector', MainCollector);
 		this.owner.register('service:main-dispatcher', MainDispatcher);
 
@@ -77,14 +67,14 @@ module('Integration | index', (hooks) => {
 		await waitUntil(() => !dispatcher.isDispatching);
 
 		assert.equal(await collector.count(), 0, 'collector is empty');
-		assert.ok((dispatcher.dispatch as SinonStub).calledWith(items), 'dispatch is called with items');
+		assert.ok(dispatcher.dispatch.calledWith(items), 'dispatch is called with items');
 	});
 
 	test('it requeues non dispatched items into collector', async(assert) => {
 		const items = [{ id: 1 }, { id: 2 }];
 		const item = items.find((i) => i.id === 1);
 
-		(dispatcher.dispatch as SinonStub).resolves([item]);
+		dispatcher.dispatch.resolves([item]);
 
 		await collector.push(...items);
 
