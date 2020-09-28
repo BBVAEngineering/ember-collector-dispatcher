@@ -1,64 +1,62 @@
 ---
 language: node_js
-node_js: lts/erbium
-sudo: false
-dist: trusty
+node_js:
+  # we recommend testing addons with the same minimum supported node version as Ember CLI
+  # so that your addon works for all apps
+  - "10"
+
+dist: xenial
 
 addons:
   chrome: stable
 
-cache: yarn
+cache:
+  yarn: true
 
 env:
   global:
+    # See https://git.io/vdao3 for details.
     - JOBS=1
 
+branches:
+  only:
+    - master
+    # npm version tags
+    - /^v\d+\.\d+\.\d+/
+
 jobs:
-  fail_fast: true
+  fast_finish: true
   allow_failures:
     - env: EMBER_TRY_SCENARIO=ember-canary
 
   include:
+    # runs linting and tests with current locked deps
     - stage: "Tests"
-      before_install:
-        - npm config set spin false
-        - npm install -g codecov
-        - npm install -g @commitlint/travis-cli
-        - yarn --version
+      name: "Tests"
       script:
-        - commitlint-travis
         - yarn lint
-        - yarn test
-      after_success:
-        - codecov --file=coverage/lcov.info
+        - yarn test:ember
 
-    - stage: "Regression Tests"
-      env: EMBER_TRY_SCENARIO=ember-lts-3.12
+    - stage: "Additional Tests"
+      name: "Floating Dependencies"
+      install:
+        - yarn install --no-lockfile --non-interactive
+      script:
+        - yarn test:ember
+
+    # we recommend new addons test the current and previous LTS
+    # as well as latest stable release (bonus points to beta/canary)
     - env: EMBER_TRY_SCENARIO=ember-lts-3.16
+    - env: EMBER_TRY_SCENARIO=ember-lts-3.20
     - env: EMBER_TRY_SCENARIO=ember-release
     - env: EMBER_TRY_SCENARIO=ember-beta
     - env: EMBER_TRY_SCENARIO=ember-canary
     - env: EMBER_TRY_SCENARIO=ember-default-with-jquery
     - env: EMBER_TRY_SCENARIO=ember-classic
 
-    - stage: "Release"
-      script: skip
-      deploy:
-        provider: script
-        skip_cleanup: true
-        script:
-          - npx semantic-release
-
 before_install:
-  - npm config set spin false
-  - yarn --version
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH=$HOME/.yarn/bin:$PATH
 
 script:
   - node_modules/.bin/ember try:one $EMBER_TRY_SCENARIO
-
-stages:
-  - "Tests"
-  - "Regression Tests"
-  - name: "Release"
-    if: branch = master
-
