@@ -7,12 +7,8 @@ import Collector, { CollectorInterface } from 'ember-collector-dispatcher/servic
 import sinon from 'sinon';
 import { begin, end } from '@ember/runloop';
 
-interface EmberFactory<T> {
-	create(...args: any[]): T
-}
-
 module('Unit | Service | collector', (hooks) => {
-	let Factory: EmberFactory<CollectorInterface>;
+	let Factory;
 	const sandbox = sinon.createSandbox();
 	const isSupported = sandbox.stub();
 	const count = sandbox.stub();
@@ -23,8 +19,7 @@ module('Unit | Service | collector', (hooks) => {
 
 	setupTest(hooks);
 
-	class DummyStorageAdapter extends EmberObject implements StorageAdapterInterface {
-		private supported!: boolean;
+	class DummyStorageAdapter extends EmberObject {
 		async isSupported() {
 			return this.supported;
 		}
@@ -41,7 +36,7 @@ module('Unit | Service | collector', (hooks) => {
 		}
 	}
 
-	class StubStorageAdapter extends EmberObject implements StorageAdapterInterface {
+	class StubStorageAdapter extends EmberObject {
 		isSupported = isSupported;
 		count = count;
 		push = push;
@@ -50,11 +45,11 @@ module('Unit | Service | collector', (hooks) => {
 		shift = shift;
 	}
 
-	class DummyCollector extends Collector implements CollectorInterface {
-		adapters: any[] = this.adapters || []
+	class DummyCollector extends Collector {
+		adapters = this.adapters || []
 	}
 
-	hooks.beforeEach(function(this: TestContext) {
+	hooks.beforeEach(function() {
 		this.owner.register('storage-adapter:dummy', DummyStorageAdapter);
 		this.owner.register('storage-adapter:stub', StubStorageAdapter);
 
@@ -72,7 +67,7 @@ module('Unit | Service | collector', (hooks) => {
 	});
 
 	test('default values can be predefined', (assert) => {
-		const adapters: any[] = [];
+		const adapters = [];
 		const klass = DummyCollector.extend({
 			adapters
 		});

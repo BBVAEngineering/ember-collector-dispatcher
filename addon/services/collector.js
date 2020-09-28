@@ -2,22 +2,8 @@ import Service from '@ember/service';
 import { StorageAdapterInterface } from '../storage-adapters/storage-adapter';
 import { getOwner } from '@ember/application';
 
-export type AdapterConfiguration = string | [string, any];
-
-export interface CollectorInterface extends Service {
-	adapters: AdapterConfiguration[]
-	count(): Promise<number>;
-	push(...items: any[]): Promise<void>;
-	unshift(...items: any[]): Promise<void>;
-	pop(count?: number): Promise<any[]>;
-	shift(count?: number): Promise<any[]>;
-}
-
-export default abstract class Collector extends Service implements CollectorInterface {
-	public abstract adapters: any[];
-	private storageAdapter!: StorageAdapterInterface;
-
-	private async setup() {
+export default class Collector extends Service {
+	async setup() {
 		if (!this.adapters) {
 			throw new Error('You must define `adapters` property on your configuration');
 		}
@@ -31,7 +17,7 @@ export default abstract class Collector extends Service implements CollectorInte
 		this.storageAdapter = supportedAdapter;
 	}
 
-	private async getAdapter() {
+	async getAdapter() {
 		const owner = getOwner(this);
 		let supported;
 
@@ -65,7 +51,7 @@ export default abstract class Collector extends Service implements CollectorInte
 		return this.storageAdapter.count();
 	}
 
-	async push(...items: any[]) {
+	async push(...items) {
 		if (!this.storageAdapter) {
 			await this.setup();
 		}
@@ -73,7 +59,7 @@ export default abstract class Collector extends Service implements CollectorInte
 		return this.storageAdapter.push(...items);
 	}
 
-	async unshift(...items: any[]) {
+	async unshift(...items) {
 		if (!this.storageAdapter) {
 			await this.setup();
 		}
@@ -81,7 +67,7 @@ export default abstract class Collector extends Service implements CollectorInte
 		return this.storageAdapter.unshift(...items);
 	}
 
-	async pop(count?: number) {
+	async pop(count) {
 		if (!this.storageAdapter) {
 			await this.setup();
 		}
@@ -89,17 +75,11 @@ export default abstract class Collector extends Service implements CollectorInte
 		return this.storageAdapter.pop(count);
 	}
 
-	async shift(count?: number) {
+	async shift(count) {
 		if (!this.storageAdapter) {
 			await this.setup();
 		}
 
 		return this.storageAdapter.shift(count);
-	}
-}
-
-declare module '@ember/service' {
-	interface Registry {
-		'collector': CollectorInterface;
 	}
 }

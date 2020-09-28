@@ -1,11 +1,7 @@
 import { StorageAdapterInterface } from './storage-adapter';
 import EmberObject from '@ember/object';
 
-export interface MemoryInterface extends StorageAdapterInterface {}
-
-export default class Memory extends EmberObject implements MemoryInterface {
-	private memory: Array<Object>;
-
+export default class Memory extends EmberObject {
 	constructor() {
 		super(...arguments);
 
@@ -16,23 +12,23 @@ export default class Memory extends EmberObject implements MemoryInterface {
 		return true;
 	}
 
-	async count(this: Memory) {
+	async count() {
 		return this.memory.length;
 	}
 
-	async push(this: Memory, ...items: any[]) {
+	async push(...items) {
 		items.forEach((item) => this.memory.push(item));
 	}
 
-	async unshift(this: Memory, ...items: any[]) {
+	async unshift(...items) {
 		items.forEach((item) => this.memory.unshift(item));
 	}
 
-	async pop(this: Memory, count: number = 1) {
+	async pop(count = 1) {
 		return this.memory.splice(-count);
 	}
 
-	async shift(this: Memory, count: number = 1) {
+	async shift(count = 1) {
 		return this.memory.splice(0, count);
 	}
 }

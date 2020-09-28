@@ -2,30 +2,14 @@ import Service from '@ember/service';
 import { MAX_TIMEOUT, MAX_CONCURRENT } from '../constants';
 import { CollectorInterface } from './collector';
 
-export interface DispatcherInterface extends Service {
-	collector: CollectorInterface;
-	maxTimeout: number;
-	maxConcurrent: number;
-	isRunning: boolean;
-	isDispatching: boolean;
-	start(): Promise<void>;
-	stop(): Promise<void>;
-	dispatch(items: any[]): Promise<any[]>;
-}
-
-export default abstract class Dispatcher extends Service implements DispatcherInterface {
-	public abstract collector: CollectorInterface;
-	public isRunning = false;
-	public isDispatching = false;
-	public abstract dispatch(items: any[]): Promise<any[]>;
-	// @ts-ignore
-	public maxTimeout: number = this.maxTimeout || MAX_TIMEOUT;
-	// @ts-ignore
-	public maxConcurrent: number = this.maxConcurrent || MAX_CONCURRENT;
+export default class Dispatcher extends Service {
+	isRunning = false;
+	isDispatching = false;
+	maxTimeout = this.maxTimeout || MAX_TIMEOUT;
+	maxConcurrent = this.maxConcurrent || MAX_CONCURRENT;
 
 	async start() {
 		this.isRunning = true;
-
 		this.waitAndSendMessage();
 	}
 
@@ -33,10 +17,10 @@ export default abstract class Dispatcher extends Service implements DispatcherIn
 		this.isRunning = false;
 	}
 
-	private waitAndSendMessage() {
+	waitAndSendMessage() {
 		const callback = window.requestIdleCallback || window.requestAnimationFrame;
 
-		callback(async () => {
+		callback(async() => {
 			if (this.isRunning && !(this.isDestroying || this.isDestroyed)) {
 				const collector = this.get('collector'); // getter for lts versions
 
@@ -58,11 +42,5 @@ export default abstract class Dispatcher extends Service implements DispatcherIn
 				this.waitAndSendMessage();
 			}
 		}, { timeout: this.maxTimeout });
-	}
-}
-
-declare module '@ember/service' {
-	interface Registry {
-		'dispatcher': DispatcherInterface;
 	}
 }
