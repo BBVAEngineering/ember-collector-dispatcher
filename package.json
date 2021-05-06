@@ -99,7 +99,7 @@
     "eslint-plugin-typescript": "^0.14.0",
     "husky": "^3.0.1",
     "istanbul": "^0.4.5",
-    "json": "^9.0.6",
+    "json": "^10.0.0",
     "loader.js": "^4.2.3",
     "semantic-release": "^15.13.3",
     "travis-deploy-once": "^5.0.11",
